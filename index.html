@@ -4,133 +4,220 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Adam Dahbi — Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #0b0c10;
-      --text: #e0e0e0;
-      --accent: #00fff7;
-      --card: #161a20;
+    * {
+      box-sizing: border-box;
     }
 
-    * {
+    html, body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
+      scroll-behavior: smooth;
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
+      background-color: #000;
+      color: #fff;
+      overflow-x: hidden;
     }
 
     header {
-      padding: 100px 20px 50px;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: transparent;
+      animation: fadeDown 1s ease-out forwards;
+    }
+
+    header .brand {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    header .btn {
+      background: #fff;
+      color: #000;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    header .btn:hover {
+      background: #ddd;
+    }
+
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
-    }
-
-    header h1 {
-      font-size: 3rem;
-      font-weight: 800;
-    }
-
-    header p {
-      font-size: 1.2rem;
-      color: #aaa;
-      margin-top: 10px;
-    }
-
-    .container {
-      max-width: 960px;
-      margin: auto;
       padding: 0 20px;
+      opacity: 0;
+      animation: fadeIn 1.4s ease-out 0.3s forwards;
     }
+
+    .hero img {
+      width: 80px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      transform: scale(0);
+      animation: zoomIn 1s ease-out forwards;
+      animation-delay: 0.5s;
+    }
+
+    .hero h1, .hero p, .hero .btn {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideFadeUp 1s ease-out forwards;
+      animation-fill-mode: forwards;
+    }
+
+    .hero p { animation-delay: 0.6s; }
+    .hero h1 { animation-delay: 0.8s; }
+    .hero .btn { animation-delay: 1s; }
 
     section {
-      margin-bottom: 60px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 20px;
+      opacity: 0;
+      transform: translateY(60px);
+      animation: fadeSlideUp 1s ease forwards;
+      animation-fill-mode: forwards;
     }
 
-    h2 {
-      color: var(--accent);
-      font-size: 1.5rem;
+    section:nth-of-type(2) { animation-delay: 0.2s; }
+    section:nth-of-type(3) { animation-delay: 0.4s; }
+    section:nth-of-type(4) { animation-delay: 0.6s; }
+
+    section h2 {
+      font-size: 5rem;
+      background: linear-gradient(to bottom, #ffb6b6, #000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       margin-bottom: 20px;
     }
 
-    .card {
-      background: var(--card);
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      transition: 0.3s;
+    section p {
+      font-size: 1.2rem;
+      max-width: 700px;
+      color: #ddd;
     }
 
-    .card:hover {
-      background: #1f232a;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+    .testimonial {
+      position: relative;
+      padding: 100px 20px;
+      background: linear-gradient(to bottom, #000, #020202);
     }
 
-    a {
-      color: var(--accent);
-      text-decoration: none;
+    .testimonial .overlay-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 7rem;
+      font-weight: bold;
+      color: rgba(0, 102, 255, 0.05);
+      white-space: nowrap;
+      z-index: 0;
+    }
+
+    .testimonial blockquote {
+      position: relative;
+      z-index: 1;
+      font-size: 1.2rem;
+      color: #fff;
+      max-width: 700px;
+      margin: auto;
+      animation: fadeIn 1.4s ease forwards;
     }
 
     footer {
+      padding: 60px 20px;
+      background: #000;
       text-align: center;
-      padding: 40px 20px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #666;
+      animation: fadeIn 1s ease-in forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes zoomIn {
+      to { transform: scale(1); }
+    }
+
+    @keyframes slideFadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeSlideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 <body>
-
   <header>
-    <h1>Adam Dahbi</h1>
-    <p>Full-stack Developer & 3D Interface Designer</p>
+    <div class="brand">Adam Dahbi <span style="font-weight: 400; color: #aaa;">Web Creator</span></div>
+    <button class="btn">Let’s Talk</button>
   </header>
 
-  <div class="container">
+  <section class="hero">
+    <img src="https://avatars.githubusercontent.com/u/9919?s=80" alt="Avatar">
+    <p>Hi there, I'm Adam!</p>
+    <h1>Building elegant web experiences<br />that make people feel something.</h1>
+    <button class="btn">Let’s Chat!</button>
+  </section>
 
-    <section>
-      <h2>About Me</h2>
-      <div class="card">
-        <p>
-          I'm a self-taught developer with a passion for futuristic design, interactivity, and building cool things online.
-          I love merging creativity with code.
-        </p>
-      </div>
-    </section>
+  <section>
+    <h2>12</h2>
+    <p>Years crafting, learning, and still obsessed with turning bold ideas into seamless products.</p>
+  </section>
 
-    <section>
-      <h2>Skills</h2>
-      <div class="card">
-        HTML, CSS, JavaScript, React, Three.js, GSAP, Tailwind, Node.js
-      </div>
-    </section>
+  <section class="testimonial">
+    <div class="overlay-text">Client Feedback</div>
+    <blockquote>
+      “Working with Adam was a turning point. Everything he delivered was on time, clean, and even better than expected. You feel his obsession with detail in every pixel.”<br/><br/>
+      <strong>— A Real Human, CEO @ Something</strong>
+    </blockquote>
+  </section>
 
-    <section>
-      <h2>Projects</h2>
-      <div class="card"><a href="#">⚡ AI Blog Generator</a></div>
-      <div class="card"><a href="#">🎮 JavaScript Game Engine</a></div>
-      <div class="card"><a href="#">🌐 My 3D Portfolio (in progress)</a></div>
-    </section>
-
-    <section>
-      <h2>Contact</h2>
-      <div class="card">
-        Email: <a href="mailto:adam@example.com">adam@example.com</a><br/>
-        GitHub: <a href="https://github.com/adamdahbi" target="_blank">@adamdahbi</a><br/>
-        Telegram: <a href="https://t.me/ipdavox" target="_blank">@ipdavox</a>
-      </div>
-    </section>
-
-  </div>
+  <section>
+    <p>Ready to elevate your idea with finesse and function?</p>
+    <h1 style="color: #00b7ff; font-size: 2rem;">Let’s build the future together.</h1>
+    <div style="margin-top: 20px;">
+      <button class="btn">Ignite Now</button>
+    </div>
+  </section>
 
   <footer>
-    &copy; 2025 Adam Dahbi — All rights reserved.
+    &copy; 2025 Adam Dahbi — Built with taste & strategy.
   </footer>
-
 </body>
 </html>
