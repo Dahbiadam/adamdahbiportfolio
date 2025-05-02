@@ -6,9 +6,7 @@
   <title>Adam Dahbi — Portfolio</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
@@ -29,7 +27,6 @@
       justify-content: space-between;
       align-items: center;
       background: transparent;
-      animation: fadeDown 1s ease-out forwards;
     }
 
     header .brand {
@@ -53,171 +50,227 @@
     }
 
     .hero {
-      height: 100vh;
+      min-height: 90vh;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 0 20px;
+    }
+
+    .fade-section {
       opacity: 0;
-      animation: fadeIn 1.4s ease-out 0.3s forwards;
+      transform: translateY(30px);
+      transition: all 0.8s ease-out;
     }
 
-    .hero img {
-      width: 80px;
-      border-radius: 50%;
-      margin-bottom: 20px;
-      transform: scale(0);
-      animation: zoomIn 1s ease-out forwards;
-      animation-delay: 0.5s;
+    .fade-section.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
-
-    .hero h1, .hero p, .hero .btn {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: slideFadeUp 1s ease-out forwards;
-      animation-fill-mode: forwards;
-    }
-
-    .hero p { animation-delay: 0.6s; }
-    .hero h1 { animation-delay: 0.8s; }
-    .hero .btn { animation-delay: 1s; }
 
     section {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      padding: 30px 20px;
+      margin-bottom: 30px;
       text-align: center;
-      padding: 60px 20px;
-      opacity: 0;
-      transform: translateY(60px);
-      animation: fadeSlideUp 1s ease forwards;
-      animation-fill-mode: forwards;
     }
 
-    section:nth-of-type(2) { animation-delay: 0.2s; }
-    section:nth-of-type(3) { animation-delay: 0.4s; }
-    section:nth-of-type(4) { animation-delay: 0.6s; }
-
-    section h2 {
-      font-size: 5rem;
-      background: linear-gradient(to bottom, #ffb6b6, #000);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 20px;
+    section h2, .testimonial-title {
+      font-size: 2rem;
+      color: #00b7ff;
+      margin-bottom: 14px;
     }
 
-    section p {
-      font-size: 1.2rem;
+    section p, .testimonial-quote {
+      font-size: 1.1rem;
       max-width: 700px;
-      color: #ddd;
+      color: #ccc;
+      line-height: 1.8;
+      margin: 0 auto;
     }
 
     .testimonial {
-      position: relative;
-      padding: 100px 20px;
-      background: linear-gradient(to bottom, #000, #020202);
-    }
-
-    .testimonial .overlay-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 7rem;
-      font-weight: bold;
-      color: rgba(0, 102, 255, 0.05);
-      white-space: nowrap;
-      z-index: 0;
-    }
-
-    .testimonial blockquote {
-      position: relative;
-      z-index: 1;
-      font-size: 1.2rem;
-      color: #fff;
-      max-width: 700px;
-      margin: auto;
-      animation: fadeIn 1.4s ease forwards;
+      padding: 40px 20px;
     }
 
     footer {
-      padding: 60px 20px;
-      background: #000;
+      padding: 40px 20px;
       text-align: center;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: #666;
-      animation: fadeIn 1s ease-in forwards;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes zoomIn {
-      to { transform: scale(1); }
-    }
-
-    @keyframes slideFadeUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeSlideUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
   </style>
+<style>
+    .hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, #00b7ff55, #00000000, #00b7ff55);
+  animation: spin 60s linear infinite;
+  z-index: 0;
+  opacity: 0.08;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hero * {
+      position: relative;
+      z-index: 1;
+    }
+</style>
 </head>
 <body>
   <header>
     <div class="brand">Adam Dahbi <span style="font-weight: 400; color: #aaa;">Web Creator</span></div>
-    <button class="btn">Let’s Talk</button>
+    <a href="#contact" class="btn">Let’s Talk</a>
   </header>
 
-  <section class="hero">
-    <img src="https://avatars.githubusercontent.com/u/9919?s=80" alt="Avatar">
-    <p>Hi there, I'm Adam!</p>
-    <h1>Building elegant web experiences<br />that make people feel something.</h1>
-    <button class="btn">Let’s Chat!</button>
+  <section class="hero fade-section" style="position: relative; background: radial-gradient(circle at center, rgba(0,183,255,0.1) 0%, rgba(0,0,0,0.95) 80%), #000; overflow: hidden;">
+    <h1 style="font-size: 3rem; font-weight: 700; color: #fff;">Hey, I’m Adam Dahbi</h1>
+    <p style="font-size: 1.4rem; color: #aaa; margin: 0;">
+      I'm a <span id="typed-text" style="color: #00b7ff; font-weight: 600;"></span>
+    </p>
   </section>
 
-  <section>
-    <h2>12</h2>
-    <p>Years crafting, learning, and still obsessed with turning bold ideas into seamless products.</p>
-  </section>
-
-  <section class="testimonial">
-    <div class="overlay-text">Client Feedback</div>
+  <section class="testimonial fade-section">
     <blockquote>
-      “Working with Adam was a turning point. Everything he delivered was on time, clean, and even better than expected. You feel his obsession with detail in every pixel.”<br/><br/>
-      <strong>— A Real Human, CEO @ Something</strong>
+      <h3 class="testimonial-title">About Me</h3>
+      <p class="testimonial-quote">
+        I started selling gadgets and designing banners before age 10. My life is a fusion of hustle, tech, and creative fire — now I turn that into immersive code.
+      </p>
+      <p class="testimonial-quote">
+        I believe in simplicity, honesty, depth, and letting my work speak louder than words. These values are the core of how I build.
+      </p>
+      <p class="testimonial-quote">
+        With over 7 years of experience building, refining, and delivering powerful digital products, I focus on creating work that feels alive.
+      </p>
     </blockquote>
   </section>
 
-  <section>
-    <p>Ready to elevate your idea with finesse and function?</p>
-    <h1 style="color: #00b7ff; font-size: 2rem;">Let’s build the future together.</h1>
-    <div style="margin-top: 20px;">
-      <button class="btn">Ignite Now</button>
-    </div>
+  <section class="testimonial fade-section">
+    <blockquote>
+      <h3 class="testimonial-title">Tech Stack</h3>
+      <div style="display: flex; overflow-x: auto; gap: 20px; padding: 20px 0; justify-content: center;">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JavaScript" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" alt="Node.js" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg" alt="MongoDB" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="VS Code" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/blender/blender-original.svg" alt="Blender" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" alt="Figma" width="40">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="40">
+      </div>
+    </blockquote>
   </section>
 
-  <footer>
-    &copy; 2025 Adam Dahbi — Built with taste & strategy.
-  </footer>
+  <section class="testimonial fade-section">
+    <blockquote>
+      <h3 class="testimonial-title">Philosophy</h3>
+      <p class="testimonial-quote">I don’t chase complexity — I aim for clarity. Design should breathe. Interfaces should feel alive. I craft digital atmospheres, not just layouts.</p>
+    </blockquote>
+  </section>
+
+  <section class="testimonial fade-section">
+    <div class="overlay-text">Testimonial</div>
+    <blockquote>
+      <h3 class="testimonial-title">What Clients Say</h3>
+      <p class="testimonial-quote">
+        “When Adam works on a project, he doesn’t just meet expectations — he reshapes them.  
+        His designs are as thoughtful as his code, and he delivers digital experiences that breathe.”
+      </p>
+      <p class="testimonial-source">— Freelance Client, Product Lead @ Visionera</p>
+    </blockquote>
+  </section>
+
+  <section class="testimonial fade-section">
+    <blockquote>
+      <h3 class="testimonial-title">Let’s Build the Future</h3>
+      <p class="testimonial-quote">If you're serious about creating something bold, elegant, and modern — let’s connect. My work blends motion, code, and precision into experiences that stand out.</p>
+    </blockquote>
+  </section>
+
+  
+
+  <section class="testimonial fade-section">
+  <blockquote>
+    <h3 id="contact" class="testimonial-title">Contact Me</h3>
+    <p class="testimonial-quote">
+      📧 its.dahbiadam@gmail.com<br>
+      📞 +212 709 881 195<br>
+      📸 @adam.the.developer<br>
+      🤙 Slide into my DMs or call me like it's 2005!
+    </p>
+  </blockquote>
+</section>
+
+<footer>
+  <div style="max-width: 600px; margin: auto; text-align: center; line-height: 1.8;">
+    <p style="font-size: 0.9rem; color: #888;">&copy; 2025 Adam Dahbi — Built with taste & strategy.</p>
+  </div>
+  <p style="font-style: italic; color: #888; margin-top: 20px;">"Stay humble. Build bold. Live true."</p>
+</footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const roles = [
+        "front-end web developer",
+        "creative coder",
+        "UI/UX designer",
+        "JavaScript enthusiast",
+        "3D web artist"
+      ];
+      let roleIndex = 0;
+      let charIndex = 0;
+      let currentText = '';
+      const typedText = document.getElementById("typed-text");
+
+      function type() {
+        if (charIndex < roles[roleIndex].length) {
+          currentText += roles[roleIndex].charAt(charIndex);
+          typedText.textContent = currentText;
+          charIndex++;
+          setTimeout(type, 80);
+        } else {
+          setTimeout(erase, 2000);
+        }
+      }
+
+      function erase() {
+        if (charIndex > 0) {
+          currentText = currentText.slice(0, -1);
+          typedText.textContent = currentText;
+          charIndex--;
+          setTimeout(erase, 50);
+        } else {
+          roleIndex = (roleIndex + 1) % roles.length;
+          setTimeout(type, 500);
+        }
+      }
+
+      if (typedText) type();
+    });
+  </script>
+  <script>
+    const fadeElements = document.querySelectorAll('.fade-section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    fadeElements.forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>
