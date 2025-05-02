@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Adam Dahbi – Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Adam Dahbi — Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0d0d0d;
-      --accent: #00ffe0;
-      --glass: rgba(255, 255, 255, 0.05);
+      --bg: #0b0c10;
+      --text: #e0e0e0;
+      --accent: #00fff7;
+      --card: #161a20;
     }
 
     * {
@@ -19,47 +20,55 @@
     }
 
     body {
-      font-family: 'Orbitron', sans-serif;
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
-      color: white;
+      color: var(--text);
       line-height: 1.6;
     }
 
     header {
+      padding: 100px 20px 50px;
       text-align: center;
-      padding: 100px 20px 60px;
     }
 
     header h1 {
       font-size: 3rem;
-      color: var(--accent);
+      font-weight: 800;
     }
 
     header p {
-      color: #aaa;
       font-size: 1.2rem;
+      color: #aaa;
       margin-top: 10px;
     }
 
-    section {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 60px 20px;
+    .container {
+      max-width: 960px;
+      margin: auto;
+      padding: 0 20px;
     }
 
-    .card {
-      background: var(--glass);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 25px;
-      margin-bottom: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 255, 224, 0.05);
-      backdrop-filter: blur(10px);
+    section {
+      margin-bottom: 60px;
     }
 
     h2 {
       color: var(--accent);
+      font-size: 1.5rem;
       margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      background: #1f232a;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
     }
 
     a {
@@ -69,9 +78,9 @@
 
     footer {
       text-align: center;
-      padding: 40px;
-      color: #555;
+      padding: 40px 20px;
       font-size: 0.9rem;
+      color: #666;
     }
   </style>
 </head>
@@ -79,42 +88,48 @@
 
   <header>
     <h1>Adam Dahbi</h1>
-    <p>Futuristic Web Developer & 3D Designer</p>
+    <p>Full-stack Developer & 3D Interface Designer</p>
   </header>
 
-  <section>
-    <div class="card">
+  <div class="container">
+
+    <section>
       <h2>About Me</h2>
-      <p>
-        I'm Adam, a Moroccan developer passionate about web design, 3D interfaces, and futuristic digital experiences.
-        I build stunning, fast websites that look good and perform even better.
-      </p>
-    </div>
+      <div class="card">
+        <p>
+          I'm a self-taught developer with a passion for futuristic design, interactivity, and building cool things online.
+          I love merging creativity with code.
+        </p>
+      </div>
+    </section>
 
-    <div class="card">
+    <section>
       <h2>Skills</h2>
-      <p>HTML, CSS, JavaScript, React, Three.js, GSAP, Blender, UI/UX</p>
-    </div>
+      <div class="card">
+        HTML, CSS, JavaScript, React, Three.js, GSAP, Tailwind, Node.js
+      </div>
+    </section>
 
-    <div class="card">
+    <section>
       <h2>Projects</h2>
-      <ul>
-        <li><a href="#">Personal 3D Portfolio</a></li>
-        <li><a href="#">Mini Game using JS</a></li>
-        <li><a href="#">AI Blog Generator</a></li>
-      </ul>
-    </div>
+      <div class="card"><a href="#">⚡ AI Blog Generator</a></div>
+      <div class="card"><a href="#">🎮 JavaScript Game Engine</a></div>
+      <div class="card"><a href="#">🌐 My 3D Portfolio (in progress)</a></div>
+    </section>
 
-    <div class="card">
+    <section>
       <h2>Contact</h2>
-      <p>Email: <a href="mailto:adam@example.com">adam@example.com</a></p>
-      <p>GitHub: <a href="https://github.com/adamdahbi" target="_blank">@adamdahbi</a></p>
-      <p>Telegram: <a href="https://t.me/ipdavox" target="_blank">@ipdavox</a></p>
-    </div>
-  </section>
+      <div class="card">
+        Email: <a href="mailto:adam@example.com">adam@example.com</a><br/>
+        GitHub: <a href="https://github.com/adamdahbi" target="_blank">@adamdahbi</a><br/>
+        Telegram: <a href="https://t.me/ipdavox" target="_blank">@ipdavox</a>
+      </div>
+    </section>
+
+  </div>
 
   <footer>
-    &copy; 2025 Adam Dahbi. Built with ❤️ and neon.
+    &copy; 2025 Adam Dahbi — All rights reserved.
   </footer>
 
 </body>
