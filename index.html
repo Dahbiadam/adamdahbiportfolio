@@ -397,6 +397,17 @@
       navbar.style.backgroundColor = window.scrollY > 100 ? '#fff' : 'transparent';
     });
   </script>
+<script>
+  function adjustHomePadding() {
+    const nav = document.getElementById('navbar');
+    const home = document.getElementById('home');
+    const navHeight = nav.offsetHeight;
+    home.style.paddingTop = `${navHeight + 40}px`; // 40px breathing space
+  }
+
+  window.addEventListener('load', adjustHomePadding);
+  window.addEventListener('resize', adjustHomePadding);
+</script>
 
 </body>
 </html>
