@@ -296,7 +296,7 @@
 
   <section id="home">
     <div>
-      <h1 class="hero-title">Web Design&<br>Development</h1>
+      <h1 class="hero-title">eb Design&<br>Development</h1>
     </div>
     <div class="hero-content">
       <div class="contact">
@@ -399,11 +399,15 @@
   </script>
 <script>
   function adjustHomePadding() {
-    const nav = document.getElementById('navbar');
-    const home = document.getElementById('home');
-    const navHeight = nav.offsetHeight;
-    home.style.paddingTop = `${navHeight + 40}px`; // 40px breathing space
+    const navbar = document.getElementById('navbar');
+    const homeSection = document.getElementById('home');
+    const navbarHeight = navbar.offsetHeight;
+    homeSection.style.paddingTop = `${navbarHeight + 40}px`; // 40px extra spacing
   }
+
+  window.addEventListener('load', adjustHomePadding);
+  window.addEventListener('resize', adjustHomePadding);
+</script>
 
   window.addEventListener('load', adjustHomePadding);
   window.addEventListener('resize', adjustHomePadding);
