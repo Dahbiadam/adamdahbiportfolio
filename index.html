@@ -28,8 +28,6 @@
       color: inherit;
       text-decoration: none;
     }
-
-    /* Navbar */
     #navbar {
       display: flex;
       justify-content: space-between;
@@ -43,12 +41,10 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       z-index: 1000;
     }
-
     .logo {
       font-weight: 800;
       font-size: 1.3rem;
     }
-
     .nav-links {
       display: flex;
       gap: 1rem;
@@ -56,28 +52,22 @@
       border-radius: 999px;
       padding: 0.5rem 1rem;
     }
-
     .nav-links a {
       color: white;
-      text-decoration: none;
       font-weight: 500;
       padding: 0.5rem 1rem;
       border-radius: 999px;
-      transition: 0.3s;
     }
-
     .nav-links a.active {
       background-color: white;
       color: black;
     }
-
     .hamburger {
       display: none;
       font-size: 2rem;
       cursor: pointer;
       color: black;
     }
-
     @media (max-width: 768px) {
       .nav-links {
         display: none;
@@ -90,270 +80,155 @@
         border-radius: 12px;
         z-index: 999;
       }
-
       .nav-links.show {
         display: flex;
       }
-
-      .nav-links a {
-        color: white;
-        padding: 0.5rem 0;
-        text-align: right;
-      }
-
       .hamburger {
         display: block;
       }
     }
-
     section {
       padding: 8rem 4%;
     }
-
-    #home {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      gap: 3rem;
-      padding-top: 10rem;
-    }
-
-    .hero-title {
-      font-size: 10vw;
-      font-weight: 800;
-      line-height: 0.95;
-    }
-
-    .hero-content {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .scroll-btn {
-      margin-top: 2rem;
-      padding: 0.75rem 1.5rem;
-      background: var(--gray);
-      border-radius: 999px;
-      font-weight: 500;
-      text-decoration: none;
-      color: black;
-      display: inline-block;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
     .section-title {
       font-size: 2.5rem;
       font-weight: 800;
       margin-bottom: 1rem;
     }
-
-    .expertise-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-      padding: 0 2rem;
-    }
-
-    .expertise-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.05);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .expertise-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 20px rgba(0,0,0,0.1);
-    }
-
-    /* Certificates Section with Slider */
-    .certificates-container {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .certificates-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
+    .slider-wrapper {
+      position: relative;
+      overflow: hidden;
       margin-top: 2rem;
     }
-
-    .certificates-grid img {
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-    }
-
-    .certificates-grid img:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-
-    @media (max-width: 768px) {
-      .certificates-grid {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 1rem;
-        padding-bottom: 1rem;
-      }
-
-      .certificates-grid img {
-        flex: 0 0 auto;
-        width: 220px;
-      }
-    }
-
-    .footer {
+    .slider {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 2rem 4%;
-      font-size: 0.85rem;
-      flex-wrap: wrap;
-      color: #555;
+      transition: transform 0.4s ease-in-out;
+    }
+    .slider img {
+      min-width: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.8);
+      border: none;
+      font-size: 2rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      z-index: 10;
+      border-radius: 999px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      user-select: none;
+    }
+    .slider-btn.left {
+      left: 10px;
+    }
+    .slider-btn.right {
+      right: 10px;
+    }
+    @media (min-width: 768px) {
+      .slider-wrapper {
+        display: none;
+      }
+      .certificates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+      .certificates-grid img {
+        width: 100%;
+        border-radius: 8px;
+      }
     }
   </style>
 </head>
 <body>
-
-<!-- ✅ NAV -->
-<nav id="navbar">
-  <div class="logo">Adam Dahbi<span style="font-size:0.75rem;">®</span></div>
-  <div class="hamburger" onclick="toggleMenu()">☰</div>
-  <div class="nav-links" id="nav-links">
-    <a href="#home" class="nav-link active">Home</a>
-    <a href="#about" class="nav-link">About</a>
-    <a href="#expertise" class="nav-link">Expertise</a>
-    <a href="#certificates" class="nav-link">Certificates</a>
-    <a href="#cv" class="nav-link">CV</a>
-    <a href="#contact" class="nav-link">Contact</a>
-  </div>
-</nav>
-
-<!-- ✅ HOME -->
-<section id="home">
-  <div>
-    <h1 class="hero-title">Future Leader<br> & Tech Builder</h1>
-  </div>
-  <div class="hero-content">
-    <p>Let’s Talk<br><a href="mailto:contact@adamdahbi.dev"><strong>contact@adamdahbi.dev</strong></a></p>
-    <p>I’m Adam Dahbi — a Moroccan teen building real impact through tech, law, and leadership.</p>
-    <a class="scroll-btn" href="#about">SCROLL DOWN ↓</a>
-  </div>
-</section>
-
-<!-- ✅ ABOUT -->
-<section id="about">
-  <h2 class="section-title">About Me</h2>
-  <p>
-    I started hustling at 9 years old — selling gadgets, creating graphics, and launching my first online gigs. Today, I'm a certified web developer and machine learning engineer, passionate about solving real problems and empowering youth.
-    <br><br>
-    I’ve built 10+ apps, mentored 27+ people in my tech group, attended Google Dev events, participated in EU-accessibility programs, and earned certifications from AWS, UNICEF, and FCC.
-    <br><br>
-    My new mission: merge technology, strategy, law, and leadership into something powerful.
-  </p>
-</section>
-
-<!-- ✅ EXPERTISE -->
-<section id="expertise">
-  <h2 class="section-title">My Expertise</h2>
-  <div class="expertise-grid">
-    <div class="expertise-card">
-      <h3>💻 Web Development</h3>
-      <p>HTML, CSS, JS, Python — Building fast, clean, functional, and human-centered apps.</p>
+  <nav id="navbar">
+    <div class="logo">Adam Dahbi<span style="font-size:0.75rem;">®</span></div>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="nav-links" id="nav-links">
+      <a href="#home" class="nav-link active">Home</a>
+      <a href="#about" class="nav-link">About</a>
+      <a href="#expertise" class="nav-link">Expertise</a>
+      <a href="#certificates" class="nav-link">Certificates</a>
+      <a href="#cv" class="nav-link">CV</a>
+      <a href="#contact" class="nav-link">Contact</a>
     </div>
-    <div class="expertise-card">
-      <h3>🧠 AI & Machine Learning</h3>
-      <p>Certified in Machine Learning with Python and AWS AI. I love making systems that learn.</p>
-    </div>
-    <div class="expertise-card">
-      <h3>🗣️ Public Speaking & Mentoring</h3>
-      <p>Mentored 27+ teens, hosted bootcamps, and learned diplomacy through EU forums.</p>
-    </div>
-    <div class="expertise-card">
-      <h3>⚖️ Law & Geopolitics</h3>
-      <p>Self-studying Moroccan law, EU policy, and how to use legal strategy for economic growth.</p>
-    </div>
-  </div>
-</section>
+  </nav>
 
-<!-- ✅ CERTIFICATES -->
-<section id="certificates">
-  <h2 class="section-title">Certificates</h2>
-  <div class="certificates-container">
+  <section id="certificates">
+    <h2 class="section-title">Certificates</h2>
+    <div class="slider-wrapper">
+      <button class="slider-btn left" onclick="slideLeft()">←</button>
+      <div class="slider" id="slider">
+        <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" />
+        <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" />
+        <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" />
+        <img src="free code cump web dev.png" alt="FreeCodeCamp Web" />
+        <img src="freecodecump machine.png" alt="FreeCodeCamp ML" />
+      </div>
+      <button class="slider-btn right" onclick="slideRight()">→</button>
+    </div>
     <div class="certificates-grid">
-      <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF Certificate" />
-      <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity Certificate" />
-      <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE Certificate" />
-      <img src="free code cump web dev.png" alt="FreeCodeCamp Web Dev Certificate" />
-      <img src="freecodecump machine.png" alt="FreeCodeCamp Machine Learning Certificate" />
+      <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" />
+      <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" />
+      <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" />
+      <img src="free code cump web dev.png" alt="FreeCodeCamp Web" />
+      <img src="freecodecump machine.png" alt="FreeCodeCamp ML" />
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ✅ CV -->
-<section id="cv">
-  <h2 class="section-title">Download My CV</h2>
-  <p><a href="Dahbi_Adam_CV.pdf" download>📄 Download CV (PDF)</a></p>
-</section>
+  <script>
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+    const navMenu = document.getElementById('nav-links');
 
-<!-- ✅ CONTACT -->
-<section id="contact">
-  <h2 class="section-title">Let’s Connect</h2>
-  <p>
-    Want to build something smart? DM me or email:<br>
-    <strong><a href="mailto:its.dahbiadam@gmail.com">its.dahbiadam@gmail.com</a></strong><br>
-    📍 Morocco | 🌍 Open to the world
-  </p>
-</section>
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const id = entry.target.getAttribute('id');
+        const navItem = document.querySelector(`.nav-link[href="#${id}"]`);
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => link.classList.remove('active'));
+          if (navItem) navItem.classList.add('active');
+        }
+      });
+    }, { threshold: 0.6 });
+    sections.forEach(section => observer.observe(section));
 
-<!-- ✅ FOOTER -->
-<footer class="footer">
-  <small>2025 © — Made by Adam Dahbi</small>
-  <div>
-    <a href="https://www.instagram.com/adam.the.developer/">Instagram</a>
-    <a href="https://www.linkedin.com/in/adam-dahbi-ba1554265/">LinkedIn</a>
-  </div>
-</footer>
+    function toggleMenu() {
+      navMenu.classList.toggle('show');
+    }
 
-<!-- ✅ JS -->
-<script>
-  const navLinks = document.querySelectorAll('.nav-link');
-  const sections = document.querySelectorAll('section');
-  const navMenu = document.getElementById('nav-links');
+    let currentIndex = 0;
+    const slider = document.getElementById('slider');
+    const slides = slider.querySelectorAll('img');
 
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      const id = entry.target.getAttribute('id');
-      const navItem = document.querySelector(`.nav-link[href="#${id}"]`);
-      if (entry.isIntersecting) {
-        navLinks.forEach(link => link.classList.remove('active'));
-        if (navItem) navItem.classList.add('active');
+    function updateSlider() {
+      const width = slider.clientWidth;
+      slider.style.transform = `translateX(-${currentIndex * width}px)`;
+    }
+
+    function slideLeft() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateSlider();
       }
-    });
-  }, { threshold: 0.6 });
-  sections.forEach(section => observer.observe(section));
+    }
 
-  function toggleMenu() {
-    navMenu.classList.toggle('show');
-  }
+    function slideRight() {
+      if (currentIndex < slides.length - 1) {
+        currentIndex++;
+        updateSlider();
+      }
+    }
 
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      navMenu.classList.remove('show');
-    });
-  });
-</script>
-
+    window.addEventListener('resize', updateSlider);
+    window.addEventListener('load', updateSlider);
+  </script>
 </body>
 </html>
