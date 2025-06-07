@@ -28,6 +28,8 @@
       color: inherit;
       text-decoration: none;
     }
+
+    /* Navbar */
     #navbar {
       display: flex;
       justify-content: space-between;
@@ -68,6 +70,7 @@
       cursor: pointer;
       color: black;
     }
+
     @media (max-width: 768px) {
       .nav-links {
         display: none;
@@ -87,14 +90,18 @@
         display: block;
       }
     }
+
     section {
       padding: 8rem 4%;
     }
+
     .section-title {
       font-size: 2.5rem;
       font-weight: 800;
       margin-bottom: 1rem;
     }
+
+    /* Certificates Slider - Mobile */
     .slider-wrapper {
       position: relative;
       overflow: hidden;
@@ -130,6 +137,8 @@
     .slider-btn.right {
       right: 10px;
     }
+
+    /* Certificates Grid - Desktop */
     @media (min-width: 768px) {
       .slider-wrapper {
         display: none;
@@ -143,92 +152,103 @@
       .certificates-grid img {
         width: 100%;
         border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
     }
   </style>
 </head>
 <body>
-  <nav id="navbar">
-    <div class="logo">Adam Dahbi<span style="font-size:0.75rem;">®</span></div>
-    <div class="hamburger" onclick="toggleMenu()">☰</div>
-    <div class="nav-links" id="nav-links">
-      <a href="#home" class="nav-link active">Home</a>
-      <a href="#about" class="nav-link">About</a>
-      <a href="#expertise" class="nav-link">Expertise</a>
-      <a href="#certificates" class="nav-link">Certificates</a>
-      <a href="#cv" class="nav-link">CV</a>
-      <a href="#contact" class="nav-link">Contact</a>
-    </div>
-  </nav>
 
-  <section id="certificates">
-    <h2 class="section-title">Certificates</h2>
-    <div class="slider-wrapper">
-      <button class="slider-btn left" onclick="slideLeft()">←</button>
-      <div class="slider" id="slider">
-        <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" />
-        <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" />
-        <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" />
-        <img src="free code cump web dev.png" alt="FreeCodeCamp Web" />
-        <img src="freecodecump machine.png" alt="FreeCodeCamp ML" />
-      </div>
-      <button class="slider-btn right" onclick="slideRight()">→</button>
-    </div>
-    <div class="certificates-grid">
+<!-- Navbar -->
+<nav id="navbar">
+  <div class="logo">Adam Dahbi<span style="font-size:0.75rem;">®</span></div>
+  <div class="hamburger" onclick="toggleMenu()">☰</div>
+  <div class="nav-links" id="nav-links">
+    <a href="#home" class="nav-link active">Home</a>
+    <a href="#about" class="nav-link">About</a>
+    <a href="#expertise" class="nav-link">Expertise</a>
+    <a href="#certificates" class="nav-link">Certificates</a>
+    <a href="#cv" class="nav-link">CV</a>
+    <a href="#contact" class="nav-link">Contact</a>
+  </div>
+</nav>
+
+<!-- Certificates Section -->
+<section id="certificates">
+  <h2 class="section-title">Certificates</h2>
+
+  <!-- Slider for mobile -->
+  <div class="slider-wrapper">
+    <button class="slider-btn left" onclick="slideLeft()">←</button>
+    <div class="slider" id="slider">
       <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" />
       <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" />
       <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" />
       <img src="free code cump web dev.png" alt="FreeCodeCamp Web" />
       <img src="freecodecump machine.png" alt="FreeCodeCamp ML" />
     </div>
-  </section>
+    <button class="slider-btn right" onclick="slideRight()">→</button>
+  </div>
 
-  <script>
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('section');
-    const navMenu = document.getElementById('nav-links');
+  <!-- Grid for desktop -->
+  <div class="certificates-grid">
+    <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" />
+    <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" />
+    <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" />
+    <img src="free code cump web dev.png" alt="FreeCodeCamp Web" />
+    <img src="freecodecump machine.png" alt="FreeCodeCamp ML" />
+  </div>
+</section>
 
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        const id = entry.target.getAttribute('id');
-        const navItem = document.querySelector(`.nav-link[href="#${id}"]`);
-        if (entry.isIntersecting) {
-          navLinks.forEach(link => link.classList.remove('active'));
-          if (navItem) navItem.classList.add('active');
-        }
-      });
-    }, { threshold: 0.6 });
-    sections.forEach(section => observer.observe(section));
+<!-- JavaScript -->
+<script>
+  // Navbar toggle
+  function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('show');
+  }
 
-    function toggleMenu() {
-      navMenu.classList.toggle('show');
-    }
-
-    let currentIndex = 0;
-    const slider = document.getElementById('slider');
-    const slides = slider.querySelectorAll('img');
-
-    function updateSlider() {
-      const width = slider.clientWidth;
-      slider.style.transform = `translateX(-${currentIndex * width}px)`;
-    }
-
-    function slideLeft() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        updateSlider();
+  // Scrollspy
+  const navLinks = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('section');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const id = entry.target.getAttribute('id');
+      const navItem = document.querySelector(`.nav-link[href="#${id}"]`);
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => link.classList.remove('active'));
+        if (navItem) navItem.classList.add('active');
       }
-    }
+    });
+  }, { threshold: 0.6 });
+  sections.forEach(section => observer.observe(section));
 
-    function slideRight() {
-      if (currentIndex < slides.length - 1) {
-        currentIndex++;
-        updateSlider();
-      }
-    }
+  // Certificate slider
+  let currentIndex = 0;
+  const slider = document.getElementById('slider');
+  const slides = slider.querySelectorAll('img');
 
-    window.addEventListener('resize', updateSlider);
-    window.addEventListener('load', updateSlider);
-  </script>
+  function updateSlider() {
+    const width = slider.clientWidth;
+    slider.style.transform = `translateX(-${currentIndex * width}px)`;
+  }
+
+  function slideLeft() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      updateSlider();
+    }
+  }
+
+  function slideRight() {
+    if (currentIndex < slides.length - 1) {
+      currentIndex++;
+      updateSlider();
+    }
+  }
+
+  window.addEventListener('resize', updateSlider);
+  window.addEventListener('load', updateSlider);
+</script>
+
 </body>
 </html>
