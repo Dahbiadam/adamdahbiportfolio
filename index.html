@@ -173,7 +173,12 @@
       box-shadow: 0 12px 20px rgba(0,0,0,0.1);
     }
 
-    /* ✅ Certificates Section (Mobile Fixed) */
+    /* Certificates Section with Slider */
+    .certificates-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
     .certificates-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -192,6 +197,20 @@
     .certificates-grid img:hover {
       transform: scale(1.05);
       box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+      .certificates-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 1rem;
+        padding-bottom: 1rem;
+      }
+
+      .certificates-grid img {
+        flex: 0 0 auto;
+        width: 220px;
+      }
     }
 
     .footer {
@@ -271,12 +290,14 @@
 <!-- ✅ CERTIFICATES -->
 <section id="certificates">
   <h2 class="section-title">Certificates</h2>
-  <div class="certificates-grid">
-    <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF Certificate" />
-    <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity Certificate" />
-    <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE Certificate" />
-    <img src="free code cump web dev.png" alt="FreeCodeCamp Web Dev Certificate" />
-    <img src="freecodecump machine.png" alt="FreeCodeCamp Machine Learning Certificate" />
+  <div class="certificates-container">
+    <div class="certificates-grid">
+      <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF Certificate" />
+      <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity Certificate" />
+      <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE Certificate" />
+      <img src="free code cump web dev.png" alt="FreeCodeCamp Web Dev Certificate" />
+      <img src="freecodecump machine.png" alt="FreeCodeCamp Machine Learning Certificate" />
+    </div>
   </div>
 </section>
 
