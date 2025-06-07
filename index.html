@@ -103,10 +103,12 @@
 
     /* Certificates Slider - Mobile */
     .slider-wrapper {
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
       position: relative;
       overflow: hidden;
       margin-top: 2rem;
-    }
     .slider {
       display: flex;
       transition: transform 0.4s ease-in-out;
@@ -231,19 +233,15 @@
   <div class="slider-wrapper">
     <button class="slider-btn left" onclick="slideLeft()">←</button>
     <div class="slider" id="slider">
-      <img src="cert1.jpg" alt="Certificate 1">
-      <img src="cert2.jpg" alt="Certificate 2">
-      <img src="cert3.jpg" alt="Certificate 3">
+      <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" style="object-fit: contain; max-height: 400px;">
+      <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" style="object-fit: contain; max-height: 400px;">
+      <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" style="object-fit: contain; max-height: 400px;">
+      <img src="free code cump web dev.png" alt="FreeCodeCamp Web" style="object-fit: contain; max-height: 400px;">
+      <img src="freecodecump machine.png" alt="FreeCodeCamp ML" style="object-fit: contain; max-height: 400px;">
     </div>
     <button class="slider-btn right" onclick="slideRight()">→</button>
   </div>
-  <div class="certificates-grid">
-    <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" style="border: 1px solid #ccc;">
-    <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" style="border: 1px solid #ccc;">
-    <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" style="border: 1px solid #ccc;">
-    <img src="free code cump web dev.png" alt="FreeCodeCamp Web" style="border: 1px solid #ccc;">
-    <img src="freecodecump machine.png" alt="FreeCodeCamp ML" style="border: 1px solid #ccc;">
-  </div>
+  
 </section>
 
 <!-- ✅ CV -->
@@ -291,26 +289,26 @@
   sections.forEach(section => observer.observe(section));
 
   let currentIndex = 0;
-  const slider = document.getElementById('slider');
-  const slides = slider.querySelectorAll('img');
+  let slideWidth = 0;
 
   function updateSlider() {
-    const width = slider.clientWidth;
-    slider.style.transform = `translateX(-${currentIndex * width}px)`;
+    const slider = document.getElementById('slider');
+    slideWidth = slider.querySelector('img').clientWidth;
+    slider.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
   }
 
   function slideLeft() {
-    if (currentIndex > 0) {
-      currentIndex--;
-      updateSlider();
-    }
+    const slider = document.getElementById('slider');
+    const slides = slider.querySelectorAll('img');
+    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+    updateSlider();
   }
 
   function slideRight() {
-    if (currentIndex < slides.length - 1) {
-      currentIndex++;
-      updateSlider();
-    }
+    const slider = document.getElementById('slider');
+    const slides = slider.querySelectorAll('img');
+    currentIndex = (currentIndex + 1) % slides.length;
+    updateSlider();
   }
 
   window.addEventListener('resize', updateSlider);
