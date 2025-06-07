@@ -159,7 +159,7 @@
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- ✅ NAV -->
 <nav id="navbar">
   <div class="logo">Adam Dahbi<span style="font-size:0.75rem;">®</span></div>
   <div class="hamburger" onclick="toggleMenu()">☰</div>
@@ -173,41 +173,109 @@
   </div>
 </nav>
 
-<!-- Certificates Section -->
-<section id="certificates">
-  <h2 class="section-title">Certificates</h2>
-
-  <!-- Slider for mobile -->
-  <div class="slider-wrapper">
-    <button class="slider-btn left" onclick="slideLeft()">←</button>
-    <div class="slider" id="slider">
-      <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" />
-      <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" />
-      <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" />
-      <img src="free code cump web dev.png" alt="FreeCodeCamp Web" />
-      <img src="freecodecump machine.png" alt="FreeCodeCamp ML" />
-    </div>
-    <button class="slider-btn right" onclick="slideRight()">→</button>
+<!-- ✅ HOME -->
+<section id="home" style="display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 3rem; padding-top: 10rem;">
+  <div>
+    <h1 class="hero-title" style="font-size: 8vw; font-weight: 800; line-height: 1.05;">Future Leader<br>& Tech Builder</h1>
   </div>
-
-  <!-- Grid for desktop -->
-  <div class="certificates-grid">
-    <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" />
-    <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" />
-    <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" />
-    <img src="free code cump web dev.png" alt="FreeCodeCamp Web" />
-    <img src="freecodecump machine.png" alt="FreeCodeCamp ML" />
+  <div class="hero-content" style="max-width: 480px;">
+    <p style="font-size: 0.9rem; font-weight: 600;">Let’s Talk<br><a href="mailto:contact@adamdahbi.dev"><strong>contact@adamdahbi.dev</strong></a></p>
+    <p style="margin-top: 1rem; line-height: 1.6;">
+      I’m Adam Dahbi — a Moroccan teen building real impact through tech, law, and leadership.
+    </p>
+    <a class="scroll-btn" href="#about" style="margin-top: 2rem; display: inline-block; background: var(--gray); padding: 0.75rem 1.5rem; border-radius: 999px; font-weight: 500; text-align: center;">SCROLL DOWN ↓</a>
   </div>
 </section>
 
-<!-- JavaScript -->
+<!-- ✅ ABOUT -->
+<section id="about">
+  <h2 class="section-title">About Me</h2>
+  <p>
+    I started hustling at 9 years old — selling gadgets, creating graphics, and launching my first online gigs. Today, I'm a certified web developer and machine learning engineer, passionate about solving real problems and empowering youth.
+    <br><br>
+    I’ve built 10+ apps, mentored 27+ people in my tech group, attended Google Dev events, participated in EU-accessibility programs, and earned certifications from AWS, UNICEF, and FCC.
+    <br><br>
+    My new mission: merge technology, strategy, law, and leadership into something powerful.
+  </p>
+</section>
+
+<!-- ✅ EXPERTISE -->
+<section id="expertise" style="background-color: #f8f8f8; text-align: center;">
+  <h2 class="section-title" style="font-size: 2.8rem; margin-bottom: 0.25rem;">My Expertise as Adam Dahbi</h2>
+  <p style="font-size: 1.1rem; color: #555; max-width: 700px; margin: 0 auto 3rem;">
+    Bringing ideas to life through thoughtful design, clean code, and intelligent systems.
+  </p>
+  <div class="expertise-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem;">
+    <div class="expertise-card" style="padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); text-align: left;">
+      <h3>💻 Web Development</h3>
+      <p>HTML, CSS, JS, Python — Building fast, clean, functional, and human-centered apps.</p>
+    </div>
+    <div class="expertise-card" style="padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); text-align: left;">
+      <h3>🧠 AI & Machine Learning</h3>
+      <p>Certified in Machine Learning with Python and AWS AI. I love making systems that learn.</p>
+    </div>
+    <div class="expertise-card" style="padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); text-align: left;">
+      <h3>🗣️ Public Speaking & Mentoring</h3>
+      <p>Mentored 27+ teens, hosted bootcamps, and learned diplomacy through EU forums.</p>
+    </div>
+    <div class="expertise-card" style="padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); text-align: left;">
+      <h3>⚖️ Law & Geopolitics</h3>
+      <p>Self-studying Moroccan law, EU policy, and how to use legal strategy for economic growth.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ CERTIFICATES -->
+<section id="certificates">
+  <h2 class="section-title">Certificates</h2>
+  <div class="slider-wrapper">
+    <button class="slider-btn left" onclick="slideLeft()">←</button>
+    <div class="slider" id="slider">
+      <img src="cert1.jpg" alt="Certificate 1">
+      <img src="cert2.jpg" alt="Certificate 2">
+      <img src="cert3.jpg" alt="Certificate 3">
+    </div>
+    <button class="slider-btn right" onclick="slideRight()">→</button>
+  </div>
+  <div class="certificates-grid">
+    <img src="Programming with and for adolescents_Course certificate (1)_page-0001.jpg" alt="UNICEF" style="border: 1px solid #ccc;">
+    <img src="Learn the Latest Tech Skills; Advance Your Career _ Udacity_page-0001.jpg" alt="Udacity" style="border: 1px solid #ccc;">
+    <img src="f03560a7-d827-4c5f-b788-ceabeaaebce2_page-0001.jpg" alt="HP LIFE" style="border: 1px solid #ccc;">
+    <img src="free code cump web dev.png" alt="FreeCodeCamp Web" style="border: 1px solid #ccc;">
+    <img src="freecodecump machine.png" alt="FreeCodeCamp ML" style="border: 1px solid #ccc;">
+  </div>
+</section>
+
+<!-- ✅ CV -->
+<section id="cv">
+  <h2 class="section-title">Download My CV</h2>
+  <p><a href="Dahbi_Adam_CV.pdf" download>📄 Download CV (PDF)</a></p>
+</section>
+
+<!-- ✅ CONTACT -->
+<section id="contact">
+  <h2 class="section-title">Let’s Connect</h2>
+  <p>
+    Want to build something smart? DM me or email:<br>
+    <strong><a href="mailto:its.dahbiadam@gmail.com">its.dahbiadam@gmail.com</a></strong><br>
+    📍 Morocco | 🌍 Open to the world
+  </p>
+</section>
+
+<!-- ✅ FOOTER -->
+<footer class="footer">
+  <small>2025 © — Made by Adam Dahbi</small>
+  <div>
+    <a href="https://www.instagram.com/adam.the.developer/">Instagram</a>
+    <a href="https://www.linkedin.com/in/adam-dahbi-ba1554265/">LinkedIn</a>
+  </div>
+</footer>
+
 <script>
-  // Navbar toggle
   function toggleMenu() {
     document.getElementById('nav-links').classList.toggle('show');
   }
 
-  // Scrollspy
   const navLinks = document.querySelectorAll('.nav-link');
   const sections = document.querySelectorAll('section');
   const observer = new IntersectionObserver(entries => {
@@ -222,7 +290,6 @@
   }, { threshold: 0.6 });
   sections.forEach(section => observer.observe(section));
 
-  // Certificate slider
   let currentIndex = 0;
   const slider = document.getElementById('slider');
   const slides = slider.querySelectorAll('img');
