@@ -1862,27 +1862,101 @@ class HabitInsights {
   }
   
   static findOptimalTime(completions) {
+    if (!completions || completions.length === 0) {
+      return 12; // Default to noon if no data
+    }
+    
     const timeSlots = {};
     completions.forEach(comp => {
       const hour = new Date(comp.created_at).getHours();
       timeSlots[hour] = (timeSlots[hour] || 0) + 1;
     });
     
-    return Object.keys(timeSlots).reduce((a, b) => 
-      timeSlots[a] > timeSlots[b] ? a : b
+    const slotsArray = Object.entries(timeSlots);
+    if (slotsArray.length === 0) {
+      return 12; // Default to noon
+    }
+    
+    return slotsArray.reduce((a, b) => 
+      a[1] > b[1] ? a : b
+    )[0]; // Return the hour with most completions
+  }
+  
+  static findWeakDays(relapses) {
+    if (!relapses || relapses.length === 0) {
+      return [];
+    }
+    
+    const dayCounts = {};
+    relapses.forEach(relapse => {
+      const day = new Date(relapse.created_at).getDay();
+      dayCounts[day] = (dayCounts[day] || 0) + 1;
+    });
+    
+    return Object.keys(dayCounts).reduce((a, b) => 
+      dayCounts[a] > dayCounts[b] ? a : b
     );
+  }
+  
+  static findSuccessFactors(completions) {
+    if (!completions || completions.length === 0) {
+      return [];
+    }
+    
+    const factors = [];
+    // Simple analysis: check for time patterns
+    const morningCompletions = completions.filter(c => {
+      const hour = new Date(c.created_at).getHours();
+      return hour >= 5 && hour < 12;
+    }).length;
+    
+    const eveningCompletions = completions.filter(c => {
+      const hour = new Date(c.created_at).getHours();
+      return hour >= 17 && hour < 22;
+    }).length;
+    
+    if (morningCompletions > eveningCompletions) {
+      factors.push('Morning routines work best for you');
+    } else if (eveningCompletions > morningCompletions) {
+      factors.push('Evening routines work best for you');
+    }
+    
+    return factors;
+  }
+  
+  static findRiskFactors(relapses) {
+    if (!relapses || relapses.length === 0) {
+      return [];
+    }
+    
+    const factors = [];
+    const weekendRelapses = relapses.filter(r => {
+      const day = new Date(r.created_at).getDay();
+      return day === 0 || day === 6; // Sunday or Saturday
+    }).length;
+    
+    if (weekendRelapses > relapses.length / 2) {
+      factors.push('Weekends are high-risk periods');
+    }
+    
+    return factors;
   }
   
   static predictRisk(habits, moodData = [], stressLevel = 0) {
     // Advanced ML model to predict relapse risk
     let riskScore = 0;
     
-    habits.forEach(habit => {
-      const habitRisk = (habit.total_relapses * 0.3) + 
-                       ((30 - habit.current_streak) * 0.2) +
-                       ((7 - (habit.current_streak % 7)) * 0.1);
-      riskScore += habitRisk;
-    });
+    if (habits && habits.length > 0) {
+      habits.forEach(habit => {
+        const habitRisk = ((habit.total_relapses || 0) * 0.3) + 
+                         ((30 - (habit.current_streak || 0)) * 0.2) +
+                         ((7 - ((habit.current_streak || 0) % 7)) * 0.1);
+        riskScore += habitRisk;
+      });
+      
+      // Average risk per habit
+      riskScore = riskScore / habits.length;
+    }
     
     // Factor in recent mood
     if (moodData.length > 0) {
@@ -1906,12 +1980,13 @@ class HabitInsights {
         type: 'positive',
         title: '🔥 Streak Momentum',
         message: `You're on a ${currentStreak}-day streak! Consistency is building your new identity.`,
-        priority: 'high'
+        priority: 'high',
+        emoji: '🔥'
       });
     }
     
     // Relapse pattern insights
-    if (relapses.length > 0) {
+    if (relapses && relapses.length > 0) {
       const recentRelapses = relapses.filter(r => {
         const relapseDate = new Date(r.created_at);
         const daysAgo = (Date.now() - relapseDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -1923,19 +1998,21 @@ class HabitInsights {
           type: 'warning',
           title: '🔄 Pattern Detected',
           message: 'Multiple relapses in the last month. Consider adjusting your strategy.',
-          priority: 'high'
+          priority: 'high',
+          emoji: '🔄'
         });
       }
     }
     
     // Time-based insights
-    const patterns = this.analyzePatterns(completions, relapses);
+    const patterns = this.analyzePatterns(completions || [], relapses || []);
     if (patterns.bestTime) {
       insights.push({
         type: 'info',
         title: '⏰ Optimal Timing',
         message: `You're most successful around ${patterns.bestTime}:00. Schedule reminders for this time.`,
-        priority: 'medium'
+        priority: 'medium',
+        emoji: '⏰'
       });
     }
     
@@ -2243,7 +2320,9 @@ let appState = {
   currentPage: 'dashboard',
   darkMode: false,
   selectedHabit: null,
-  awardedBadges: [] // NEW: Track awarded badges
+  awardedBadges: [], // NEW: Track awarded badges
+  habitModalType: null,
+  newHabitCategory: null
 };
 
 let emergencyStream = null;
@@ -2405,7 +2484,28 @@ function calculateTimeClean(startDate) {
 
 // NEW: Enhanced error handling wrapper
 async function withErrorHandling(operation, fallbackMessage, context = {}) {
-  return await ErrorBoundary.wrap(operation, fallbackMessage, context);
+  try {
+    const startTime = performance.now();
+    const result = await operation();
+    const duration = performance.now() - startTime;
+    
+    console.log(`✅ Operation completed in ${duration.toFixed(2)}ms`, context);
+    return result;
+  } catch (error) {
+    console.error('❌ Operation failed:', { error, context });
+    
+    showNotification(`❌ ${fallbackMessage}`);
+    // In production, send to error tracking service
+    if (window.analytics) {
+      window.analytics.track('Error Occurred', {
+        error: error.message,
+        stack: error.stack,
+        ...context
+      });
+    }
+    
+    return null;
+  }
 }
 
 // NEW: Form validation
@@ -2431,7 +2531,7 @@ function validateHabitForm(name, category) {
 async function safeSupabaseOperation(operation, errorMessage) {
   return withErrorHandling(async () => {
     const result = await operation();
-    if (result.error) throw new Error(result.error.message);
+    if (result && result.error) throw new Error(result.error.message);
     return result;
   }, errorMessage);
 }
@@ -2616,7 +2716,7 @@ async function nextOnboardingStep() {
       // Create user profile
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert([
+        .upsert([
           {
             id: data.user.id,
             email: email,
@@ -2626,11 +2726,14 @@ async function nextOnboardingStep() {
             streak: 0,
             best_streak: 0
           }
-        ]);
+        ], { 
+          onConflict: 'id'
+        });
       
       if (profileError) {
-        // Table might not exist, create it
-        console.warn('Profile table might not exist:', profileError);
+        console.warn('Profile creation error:', profileError);
+        showNotification('Account created! Some features may be limited.');
+      } else {
         showNotification('Account created! Setting up your profile...');
       }
       
@@ -3116,7 +3219,10 @@ async function logout() {
         profile: null,
         habits: { quit: [], build: [] }, 
         currentPage: 'dashboard', 
-        darkMode: false 
+        darkMode: false,
+        awardedBadges: [],
+        habitModalType: null,
+        newHabitCategory: null
       };
     }
   }
@@ -3291,28 +3397,75 @@ async function confirmAddHabit() {
       total_relapses: 0
     };
     
-    const { data, error } = await safeSupabaseOperation(
-      () => supabase.from('habits').insert([habitData]).select().single(),
-      'Error adding habit'
-    );
+    // First, try to insert the habit
+    let { data, error } = await supabase
+      .from('habits')
+      .insert([habitData])
+      .select()
+      .single();
     
-    if (!data) return;
+    // If we get a foreign key error, try to create a profile and then retry
+    if (error && error.code === '23503') {
+      // Create a profile for the user
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert([
+          {
+            id: appState.session.user.id,
+            email: appState.session.user.email,
+            xp: 0,
+            level: 1,
+            streak: 0,
+            best_streak: 0
+          }
+        ], { onConflict: 'id' });
+      
+      if (profileError) {
+        console.warn('Profile creation failed:', profileError);
+        // We'll continue and try to insert the habit again, but it might fail
+      }
+      
+      // Retry the habit insertion
+      ({ data, error } = await supabase
+        .from('habits')
+        .insert([habitData])
+        .select()
+        .single());
+    }
     
-    appState.habits[appState.habitModalType].unshift(data);
-    updateHabitCounts();
-    renderDashboard();
-    closeAddModal();
-    showNotification(`"${name}" added! ${appState.habitModalType === 'quit' ? '🎯' : '💪'}`);
+    if (error) {
+      throw error;
+    }
     
-    // Award XP for adding habit
-    await awardXP(10, 'habit_creation', `Created habit: ${name}`);
-    
-    // NEW: Check for badges
-    await checkAndAwardBadges();
+    if (data) {
+      appState.habits[appState.habitModalType].unshift(data);
+      updateHabitCounts();
+      renderDashboard();
+      closeAddModal();
+      showNotification(`"${name}" added! ${appState.habitModalType === 'quit' ? '🎯' : '💪'}`);
+      
+      // Award XP for adding habit
+      await awardXP(10, 'habit_creation', `Created habit: ${name}`);
+      
+      // NEW: Check for badges
+      await checkAndAwardBadges();
+    } else {
+      // Fallback: Add to local state only
+      const localHabit = {
+        id: 'local-' + Date.now(),
+        ...habitData,
+        created_at: new Date().toISOString()
+      };
+      appState.habits[appState.habitModalType].unshift(localHabit);
+      updateHabitCounts();
+      renderDashboard();
+      closeAddModal();
+      showNotification(`"${name}" added locally (database error) ${appState.habitModalType === 'quit' ? '🎯' : '💪'}`);
+    }
     
   } catch (error) {
     console.error('Error adding habit:', error);
-    showNotification('Error adding habit');
+    showNotification('Error adding habit: ' + error.message);
   } finally {
     setLoading(document.getElementById('confirm-add'), false);
   }
@@ -3415,17 +3568,29 @@ async function renderRiskAssessment() {
   
   try {
     // Get recent data for analysis
-    const { data: recentCompletions } = await supabase
-      .from('habit_completions')
-      .select('*')
-      .eq('user_id', appState.session.user.id)
-      .gte('completed_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    let recentCompletions = [];
+    let recentRelapses = [];
     
-    const { data: recentRelapses } = await supabase
-      .from('habit_relapses')
-      .select('*')
-      .eq('user_id', appState.session.user.id)
-      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    try {
+      const { data: completionsData } = await supabase
+        .from('habit_completions')
+        .select('*')
+        .eq('user_id', appState.session.user.id)
+        .gte('completed_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+      
+      recentCompletions = completionsData || [];
+      
+      const { data: relapsesData } = await supabase
+        .from('habit_relapses')
+        .select('*')
+        .eq('user_id', appState.session.user.id)
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+      
+      recentRelapses = relapsesData || [];
+    } catch (error) {
+      console.log('Could not fetch analytics data:', error);
+      // Use empty arrays as fallback
+    }
     
     // Calculate risk level
     const riskLevel = HabitInsights.predictRisk(
@@ -3437,8 +3602,8 @@ async function renderRiskAssessment() {
     // Generate insights
     const insights = HabitInsights.generateInsights(
       [...appState.habits.quit, ...appState.habits.build],
-      recentCompletions || [],
-      recentRelapses || []
+      recentCompletions,
+      recentRelapses
     );
     
     let riskClass = 'low-risk';
