@@ -1,1626 +1,1205 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA - Flex Your Fitness</title>
-    <!-- MediaPipe Pose Detection -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
-    <!-- Chart.js for analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- HTML2Canvas for share cards -->
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <style>
-        /* ===== MODERN CSS VARIABLES ===== */
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            --dark-bg: #0f172a;
-            --darker-bg: #0b1220;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --border-color: #334155;
-            --accent-purple: #8b5cf6;
-            --accent-pink: #ec4899;
-            --accent-green: #10b981;
-            --accent-yellow: #fbbf24;
-            --radius-lg: 20px;
-            --radius-md: 12px;
-            --radius-sm: 8px;
-            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.2);
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: var(--dark-bg);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* ===== LAYOUT ===== */
-        .app-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ===== HEADER ===== */
-        .app-header {
-            background: var(--card-bg);
-            padding: 1.5rem 2rem;
-            box-shadow: var(--shadow-md);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo-icon {
-            font-size: 2.5rem;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .logo-text {
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .aura-points {
-            background: var(--primary-gradient);
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            box-shadow: var(--shadow-md);
-        }
-
-        .aura-points span {
-            font-size: 1.5rem;
-            font-weight: 800;
-        }
-
-        .aura-points small {
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
-
-        /* ===== MAIN CONTENT ===== */
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* ===== HERO SECTION ===== */
-        .hero-section {
-            text-align: center;
-            padding: 3rem 0;
-            margin-bottom: 3rem;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 900;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 1rem;
-            line-height: 1.2;
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-        }
-
-        /* ===== CHALLENGE GRID ===== */
-        .challenge-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .challenge-card {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .challenge-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--accent-purple);
-        }
-
-        .challenge-card.active {
-            border: 2px solid var(--accent-green);
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
-        }
-
-        .challenge-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .challenge-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .challenge-description {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-        }
-
-        .challenge-stats {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.3rem;
-            font-weight: 800;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        /* ===== CAMERA TRACKER ===== */
-        .camera-section {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            margin-bottom: 3rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .camera-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            background: #000;
-            aspect-ratio: 16/9;
-        }
-
-        #camera-video {
-            width: 100%;
-            height: 100%;
-            display: block;
-            object-fit: cover;
-            transform: scaleX(-1); /* Mirror effect for selfie view */
-        }
-
-        #pose-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .tracker-overlay {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius-md);
-            backdrop-filter: blur(10px);
-            z-index: 10;
-        }
-
-        .tracker-stats {
-            display: flex;
-            gap: 2rem;
-            text-align: center;
-        }
-
-        .tracker-value {
-            font-size: 2.5rem;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        .tracker-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 0.25rem;
-        }
-
-        .controls {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            min-width: 180px;
-            justify-content: center;
-        }
-
-        .btn-primary {
-            background: var(--primary-gradient);
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-success {
-            background: var(--success-gradient);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-            color: white;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Status message */
-        .status-message {
-            margin: 1rem auto;
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            max-width: 600px;
-            text-align: center;
-        }
-
-        .status-success {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .status-error {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .status-info {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        /* ===== PROGRESS SECTION ===== */
-        .progress-section {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            margin-bottom: 3rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .progress-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .progress-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            border-left: 4px solid var(--accent-purple);
-        }
-
-        /* ===== SHARE CARDS ===== */
-        .share-section {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .share-card-preview {
-            max-width: 600px;
-            margin: 2rem auto;
-            background: var(--primary-gradient);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .share-card-content {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: var(--radius-md);
-            text-align: center;
-        }
-
-        .share-title {
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-            background: white;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .share-stats {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            margin: 2rem 0;
-        }
-
-        .share-stat {
-            text-align: center;
-        }
-
-        .share-stat-value {
-            font-size: 3rem;
-            font-weight: 900;
-            display: block;
-            background: white;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .share-stat-label {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-
-        /* ===== MODALS ===== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 2rem;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            max-width: 500px;
-            width: 100%;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-            position: relative;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .close-modal:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* ===== LOADING STATES ===== */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        /* ===== FORM CORRECTION FEEDBACK ===== */
-        .form-feedback {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            backdrop-filter: blur(10px);
-            max-width: 300px;
-            display: none;
-            z-index: 10;
-        }
-
-        .form-feedback.active {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-
-        .feedback-title {
-            color: var(--accent-yellow);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* ===== RESPONSIVE DESIGN ===== */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .challenge-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .tracker-stats {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .controls {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .share-stats {
-                flex-direction: column;
-                gap: 1rem;
-            }
-        }
-
-        /* ===== UTILITY CLASSES ===== */
-        .text-center { text-align: center; }
-        .mb-1 { margin-bottom: 1rem; }
-        .mb-2 { margin-bottom: 2rem; }
-        .mt-1 { margin-top: 1rem; }
-        .mt-2 { margin-top: 2rem; }
-        .d-none { display: none; }
-        .d-flex { display: flex; }
-        .flex-column { flex-direction: column; }
-        .align-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .gap-1 { gap: 1rem; }
-        .w-100 { width: 100%; }
-
-        /* ===== FOOTER ===== */
-        .app-footer {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            border-top: 1px solid var(--border-color);
-            margin-top: auto;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AURA V2 — Flex Your Fitness</title>
+
+  <!-- MediaPipe Pose -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- html2canvas -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+  <style>
+    /* ========== DESIGN TOKENS ========== */
+    :root{
+      --dark-bg:#071021;
+      --card:#0f1724;
+      --muted:#98a2b3;
+      --glass: rgba(255,255,255,0.03);
+      --accent1: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      --accent2: linear-gradient(135deg,#f093fb 0%,#f5576c 100%);
+      --success: linear-gradient(135deg,#43e97b 0%,#38f9d7 100%);
+      --radius:14px;
+      --shadow-lg: 0 18px 40px rgba(2,6,23,0.6);
+      --shadow-sm: 0 6px 18px rgba(2,6,23,0.45);
+      --glass-blur: blur(8px);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#020617 0%, var(--dark-bg) 100%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.4;
+    }
+
+    /* ========== LAYOUT ========== */
+    .app {
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    header.app-header{
+      backdrop-filter: var(--glass-blur);
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      padding:18px 24px;
+      position:sticky;
+      top:0;
+      z-index:60;
+      box-shadow:var(--shadow-sm);
+    }
+
+    .header-grid{
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .brand{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+
+    .logo {
+      width:48px;height:48px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--accent1);
+      font-weight:900;font-size:20px;
+      box-shadow:var(--shadow-sm);
+    }
+    .brand h1{
+      font-size:18px;margin:0;letter-spacing:0.4px;
+      background:var(--accent1);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .header-actions{
+      display:flex;gap:12px;align-items:center;
+    }
+    .aura-pill{
+      padding:8px 12px;border-radius:999px;background:var(--glass);
+      display:flex;gap:10px;align-items:center;border:1px solid rgba(255,255,255,0.03);
+    }
+    .aura-pill strong{font-weight:800}
+
+    /* ========== NAV ========== */
+    nav.tabs{
+      max-width:1200px;margin:18px auto 0;display:flex;gap:10px;padding:0 24px;
+      align-items:center;justify-content:flex-start;
+    }
+    .tab{
+      padding:10px 14px;border-radius:12px;background:transparent;border:1px solid rgba(255,255,255,0.02);
+      cursor:pointer;color:var(--muted);font-weight:600;
+    }
+    .tab.active{
+      background:var(--card);border:1px solid rgba(139,92,246,0.25);
+      box-shadow:var(--shadow-sm);color:#fff;
+      background-image: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(236,72,153,0.03));
+    }
+
+    main.container{
+      max-width:1200px;margin:20px auto;padding:0 24px;flex:1;width:100%;
+    }
+
+    section.card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
+      border-radius:var(--radius);padding:18px;border:1px solid rgba(255,255,255,0.03);
+      box-shadow:var(--shadow-lg);margin-bottom:20px;
+    }
+
+    .grid{display:grid;gap:14px}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+    .center{text-align:center}
+
+    /* ========== HERO ========== */
+    .hero-title{font-size:28px;margin:0 0 6px}
+    .hero-sub{color:var(--muted);margin:0 0 12px;font-size:14px}
+
+    .controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+    .btn{
+      padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:700;
+      background:var(--glass);color:#fff;border:1px solid rgba(255,255,255,0.03);
+    }
+    .btn.primary{background:var(--accent1);box-shadow:var(--shadow-sm)}
+    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.04);color:var(--muted)}
+    .btn.danger{background:linear-gradient(135deg,#f43f5e 0%,#f97316 100%);}
+
+    /* ========== CHALLENGE GRID ========== */
+    .challenge-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .challenge-card{padding:14px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));border:1px solid rgba(255,255,255,0.02);cursor:pointer;transition:all .22s;display:flex;flex-direction:column;gap:8px}
+    .challenge-card:hover{transform:translateY(-6px)}
+    .challenge-card.active{box-shadow:0 8px 30px rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.22)}
+    .challenge-emoji{font-size:28px}
+    .challenge-title{font-weight:800}
+    .challenge-desc{color:var(--muted);font-size:13px}
+
+    /* ========== CAMERA SECTION ========== */
+    .camera-row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+    .camera-preview{flex:1;min-width:320px;border-radius:12px;overflow:hidden;background:#000;position:relative;border:1px solid rgba(255,255,255,0.03)}
+    video#camera-video{width:100%;height:auto;transform:scaleX(-1);display:block}
+    canvas#pose-canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+    .tracker-overlay{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.45);padding:10px;border-radius:10px;backdrop-filter:blur(6px)}
+    .tracker-overlay .value{font-weight:900;font-size:20px}
+
+    /* ========== SHARE PREVIEW ========== */
+    .share-preview{max-width:720px;margin:0 auto;border-radius:12px;padding:18px;background:linear-gradient(135deg,#111827,#0b1220);text-align:center}
+    .share-title{font-weight:900;font-size:20px;margin-bottom:8px}
+    .share-stats{display:flex;gap:18px;justify-content:center}
+
+    /* ========== PROGRESS ========== */
+    .progress-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    .metric{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center}
+
+    footer.app-footer{text-align:center;padding:22px 24px;color:var(--muted);font-size:13px;border-top:1px solid rgba(255,255,255,0.02)}
+
+    /* ========== MODALS ========== */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(1,4,10,0.6);display:none;align-items:center;justify-content:center;z-index:120}
+    .modal-backdrop.active{display:flex}
+    .modal{
+      width:100%;max-width:680px;background:var(--card);border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,0.03);
+      box-shadow:var(--shadow-lg)
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width:900px){
+      .grid.cols-3{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:620px){
+      .grid.cols-3{grid-template-columns:1fr}
+      .header-grid{flex-direction:column;gap:8px;align-items:flex-start}
+      nav.tabs{overflow:auto;padding-left:12px}
+    }
+  </style>
 </head>
+
 <body>
-    <div class="app-container">
-        <!-- HEADER -->
-        <header class="app-header">
-            <div class="header-content">
-                <div class="logo">
-                    <div class="logo-icon">⚡</div>
-                    <div class="logo-text">AURA</div>
+  <div class="app">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-grid">
+        <div class="brand">
+          <div class="logo">⚡</div>
+          <div>
+            <h1>AURA</h1>
+            <div style="font-size:12px;color:var(--muted)">Flex Your Fitness • AI Pose Tracking</div>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="aura-pill" title="Total Aura Points">
+            <span style="font-size:12px;color:var(--muted)">Aura</span>
+            <strong id="total-aura">0</strong>
+          </div>
+          <button class="btn ghost" id="open-onboard">ℹ️ How it works</button>
+        </div>
+      </div>
+
+      <nav class="tabs" role="navigation" aria-label="Main navigation">
+        <div class="tab active" data-target="tab-track">Track</div>
+        <div class="tab" data-target="tab-challenges">Challenges</div>
+        <div class="tab" data-target="tab-progress">Progress</div>
+        <div class="tab" data-target="tab-share">Share</div>
+        <div class="tab" data-target="tab-settings">Settings</div>
+      </nav>
+    </header>
+
+    <!-- MAIN -->
+    <main class="container" id="main-app">
+      <!-- TRACK -->
+      <section id="tab-track" class="card">
+        <div class="grid cols-3">
+          <div style="grid-column:1/span 2">
+            <div class="hero">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                <div>
+                  <h2 class="hero-title">Live Tracking</h2>
+                  <div class="hero-sub">Use camera AI or GPS to track your workout. Start a session and get Aura points instantly.</div>
                 </div>
-                <div class="aura-points">
-                    <span id="total-aura">0</span>
-                    <small>Aura Points</small>
+                <div>
+                  <button id="btn-start-session" class="btn primary">▶ Start Session</button>
+                  <button id="btn-stop-session" class="btn danger" style="display:none">⏹ Stop</button>
                 </div>
+              </div>
+
+              <div style="margin-top:12px" class="camera-row">
+                <div class="camera-preview" id="camera-card" aria-hidden="false">
+                  <video id="camera-video" playsinline></video>
+                  <canvas id="pose-canvas"></canvas>
+
+                  <div class="tracker-overlay">
+                    <div style="display:flex;gap:14px;align-items:center">
+                      <div class="center">
+                        <div class="value" id="rep-count">0</div>
+                        <div style="font-size:11px;color:var(--muted)">REPS</div>
+                      </div>
+                      <div class="center">
+                        <div class="value" id="aura-earned">0</div>
+                        <div style="font-size:11px;color:var(--muted)">AURA</div>
+                      </div>
+                      <div class="center">
+                        <div class="value" id="session-timer">0:00</div>
+                        <div style="font-size:11px;color:var(--muted)">TIME</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="form-feedback" style="position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,0.6);padding:8px;border-radius:8px;display:none">
+                    <div style="font-weight:700;color:#ffd66b">Form Tip</div>
+                    <div id="feedback-text" style="font-size:13px;color:var(--muted)">Keep your back straight</div>
+                  </div>
+                </div>
+
+                <div style="min-width:240px;flex-basis:260px">
+                  <div class="card" style="padding:12px">
+                    <h4 style="margin:0 0 6px">Session Controls</h4>
+                    <div style="display:flex;gap:8px;margin-bottom:8px">
+                      <button id="btn-switch-camera" class="btn">🔄 Switch Camera</button>
+                      <button id="btn-demo-mode" class="btn ghost">🎬 Demo</button>
+                    </div>
+
+                    <div style="margin-top:8px">
+                      <label style="display:block;font-size:13px;color:var(--muted)">Selected Exercise</label>
+                      <div id="selected-exercise" style="font-weight:800;margin-top:6px">PUSHUPS</div>
+                    </div>
+
+                    <div style="margin-top:12px">
+                      <label style="display:block;font-size:13px;color:var(--muted)">Mode</label>
+                      <select id="tracking-mode" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);">
+                        <option value="camera">Camera Pose</option>
+                        <option value="gps">GPS (Running)</option>
+                        <option value="timer">Timer (Meditation / Plank)</option>
+                      </select>
+                    </div>
+
+                    <div style="margin-top:12px">
+                      <label style="display:block;font-size:13px;color:var(--muted)">Difficulty</label>
+                      <select id="difficulty" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);">
+                        <option value="1">Beginner</option>
+                        <option value="2">Intermediate</option>
+                        <option value="3">Advanced</option>
+                      </select>
+                    </div>
+
+                    <div style="margin-top:12px;font-size:13px;color:var(--muted)">
+                      <div><strong>Tip:</strong> Use 2-3 meters distance for full-body exercises.</div>
+                    </div>
+                  </div>
+
+                  <div class="card" style="margin-top:12px;padding:12px">
+                    <h4 style="margin:0 0 6px">GPS Run (demo)</h4>
+                    <div style="font-size:13px;color:var(--muted)">Start GPS mode and use the 'Start Session' button to record a run.</div>
+                    <div style="display:flex;gap:8px;margin-top:10px">
+                      <div class="metric" style="flex:1">
+                        <div style="font-weight:900;font-size:18px" id="gps-distance">0.00 km</div>
+                        <div style="font-size:12px;color:var(--muted)">Distance</div>
+                      </div>
+                      <div class="metric" style="flex:1">
+                        <div style="font-weight:900;font-size:18px" id="gps-speed">0.0 km/h</div>
+                        <div style="font-size:12px;color:var(--muted)">Speed</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
-        </header>
+          </div>
 
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-            <!-- HERO SECTION -->
-            <section class="hero-section">
-                <h1 class="hero-title">Flex Your Fitness Journey</h1>
-                <p class="hero-subtitle">
-                    Track workouts with AI camera, earn Aura Points, create stunning share cards.
-                    Go viral with your progress!
-                </p>
-                <div class="controls">
-                    <button id="btn-start-demo" class="btn btn-primary">
-                        🎬 Start Camera Demo
-                    </button>
-                    <button id="btn-generate-share" class="btn btn-success">
-                        🎨 Generate Share Card
-                    </button>
-                </div>
-            </section>
+          <aside style="gap:12px;display:flex;flex-direction:column">
+            <div class="card center">
+              <div style="font-size:12px;color:var(--muted)">Session Best</div>
+              <div style="font-weight:900;font-size:26px" id="best-aura">0 Aura</div>
+              <div style="margin-top:8px"><button id="btn-generate-share-quick" class="btn primary">Generate Share Card</button></div>
+            </div>
 
-            <!-- STATUS MESSAGES -->
-            <div id="status-message" class="status-message d-none"></div>
+            <div class="card">
+              <h4 style="margin:0 0 8px">Quick Actions</h4>
+              <div style="display:flex;gap:8px;flex-direction:column">
+                <button id="btn-download-share-quick" class="btn">Download Share</button>
+                <button id="btn-clear-data" class="btn ghost">Clear Local Data</button>
+              </div>
+            </div>
 
-            <!-- CHALLENGE SELECTION -->
-            <section class="mb-2">
-                <h2 class="mb-1 text-center">🎯 Choose Your Challenge</h2>
-                <div class="challenge-grid" id="challenge-grid">
-                    <!-- Challenges will be populated by JavaScript -->
-                </div>
-            </section>
+            <div class="card">
+              <h4 style="margin:0 0 8px">Achievements</h4>
+              <div id="achievements-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+            </div>
+          </aside>
+        </div>
+      </section>
 
-            <!-- CAMERA TRACKER -->
-            <section class="camera-section">
-                <h2 class="mb-1 text-center">📸 Live Camera Tracking</h2>
-                <p class="text-center mb-2">Position yourself 2-3 meters from camera for best results</p>
-                
-                <div class="camera-container">
-                    <video id="camera-video" autoplay playsinline></video>
-                    <canvas id="pose-canvas"></canvas>
-                    
-                    <div class="tracker-overlay">
-                        <div class="tracker-stats">
-                            <div>
-                                <div class="tracker-value" id="rep-count">0</div>
-                                <div class="tracker-label">REPS</div>
-                            </div>
-                            <div>
-                                <div class="tracker-value" id="aura-earned">0</div>
-                                <div class="tracker-label">AURA</div>
-                            </div>
-                            <div>
-                                <div class="tracker-value" id="timer">0:00</div>
-                                <div class="tracker-label">TIME</div>
-                            </div>
-                        </div>
-                    </div>
+      <!-- CHALLENGES -->
+      <section id="tab-challenges" class="card" style="display:none">
+        <h3 style="margin:0 0 12px">Choose Challenge</h3>
+        <div class="challenge-grid" id="challenge-grid"></div>
+      </section>
 
-                    <!-- Form Correction Feedback -->
-                    <div class="form-feedback" id="form-feedback">
-                        <div class="feedback-title">⚠️ Form Tip</div>
-                        <div id="feedback-text">Keep your back straight!</div>
-                    </div>
-                </div>
+      <!-- PROGRESS -->
+      <section id="tab-progress" class="card" style="display:none">
+        <h3 style="margin:0 0 12px">Progress & Analytics</h3>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <div style="flex:1;min-width:240px">
+            <canvas id="progress-chart" height="140"></canvas>
+          </div>
+          <div style="min-width:220px;flex-basis:260px">
+            <div class="progress-cards">
+              <div class="metric">
+                <div style="font-size:18px;font-weight:900" id="streak-days">0</div>
+                <div style="font-size:12px;color:var(--muted)">Current Streak (days)</div>
+              </div>
+              <div class="metric">
+                <div style="font-size:18px;font-weight:900" id="total-sessions">0</div>
+                <div style="font-size:12px;color:var(--muted)">Sessions</div>
+              </div>
+              <div class="metric">
+                <div style="font-size:18px;font-weight:900" id="total-aura-dup">0</div>
+                <div style="font-size:12px;color:var(--muted)">Total Aura</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                <div class="controls mt-2">
-                    <button id="btn-start-tracker" class="btn btn-primary">
-                        ▶️ Start Tracking
-                    </button>
-                    <button id="btn-stop-tracker" class="btn btn-danger d-none">
-                        ⏹️ Stop Tracking
-                    </button>
-                    <button id="btn-switch-camera" class="btn">
-                        🔄 Switch Camera
-                    </button>
-                </div>
+      <!-- SHARE -->
+      <section id="tab-share" class="card" style="display:none">
+        <h3 style="margin:0 0 12px">Share Card Generator</h3>
 
-                <!-- Exercise Instructions -->
-                <div class="mt-2" id="exercise-instructions">
-                    <h4>📋 How to perform:</h4>
-                    <p id="instructions-text">Select a challenge to see instructions</p>
-                </div>
-            </section>
+        <div class="share-preview" id="share-card-preview">
+          <div class="share-title" id="share-workout-name">PUSHUPS</div>
+          <div class="share-stats">
+            <div style="text-align:center">
+              <div style="font-weight:900;font-size:28px" id="share-reps">0</div>
+              <div style="font-size:12px;color:var(--muted)">REPS</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-weight:900;font-size:28px" id="share-aura">0</div>
+              <div style="font-size:12px;color:var(--muted)">AURA</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-weight:900;font-size:28px" id="share-time">0:00</div>
+              <div style="font-size:12px;color:var(--muted)">TIME</div>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <div id="share-badge" style="display:none;padding:8px;border-radius:999px;background:linear-gradient(135deg,#f59e0b,#f97316);font-weight:800">🔥 PERSONAL BEST</div>
+          </div>
+        </div>
 
-            <!-- PROGRESS & ANALYTICS -->
-            <section class="progress-section">
-                <h2 class="mb-1 text-center">📊 Your Progress</h2>
-                <canvas id="progress-chart"></canvas>
-                
-                <div class="progress-grid mt-2">
-                    <div class="progress-card">
-                        <h4>🔥 Current Streak</h4>
-                        <div class="tracker-value">0 days</div>
-                    </div>
-                    <div class="progress-card">
-                        <h4>🏆 Best Session</h4>
-                        <div class="tracker-value">0 Aura</div>
-                    </div>
-                    <div class="progress-card">
-                        <h4>🎯 Challenges Done</h4>
-                        <div class="tracker-value">0</div>
-                    </div>
-                    <div class="progress-card">
-                        <h4>⭐ Level</h4>
-                        <div class="tracker-value">1</div>
-                    </div>
-                </div>
-            </section>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:12px">
+          <button id="btn-download-share" class="btn primary">📥 Download Image</button>
+          <button id="btn-share-social" class="btn">📤 Share</button>
+          <button id="btn-customize-share" class="btn ghost">🎨 Customize</button>
+        </div>
 
-            <!-- SHARE CARD GENERATOR -->
-            <section class="share-section">
-                <h2 class="mb-1 text-center">🎨 Create Viral Share Card</h2>
-                <p class="text-center mb-2">Generate stunning images to flex on social media</p>
-                
-                <div class="share-card-preview" id="share-card-preview">
-                    <div class="share-card-content">
-                        <div class="share-title" id="share-workout-name">PUSHUPS</div>
-                        <div class="share-stats">
-                            <div class="share-stat">
-                                <span class="share-stat-value" id="share-reps">50</span>
-                                <span class="share-stat-label">REPS</span>
-                            </div>
-                            <div class="share-stat">
-                                <span class="share-stat-value" id="share-aura">50</span>
-                                <span class="share-stat-label">AURA</span>
-                            </div>
-                            <div class="share-stat">
-                                <span class="share-stat-value" id="share-time">2:30</span>
-                                <span class="share-stat-label">TIME</span>
-                            </div>
-                        </div>
-                        <div class="badge" id="share-badge">🏆 NEW PERSONAL BEST</div>
-                    </div>
-                </div>
+        <canvas id="share-canvas" width="1200" height="630" style="display:none"></canvas>
+      </section>
 
-                <div class="controls mt-2">
-                    <button id="btn-customize-share" class="btn">
-                        🎨 Customize Design
-                    </button>
-                    <button id="btn-download-share" class="btn btn-success">
-                        📥 Download Image
-                    </button>
-                    <button id="btn-share-social" class="btn btn-primary">
-                        📤 Share to Social
-                    </button>
-                </div>
-            </section>
-        </main>
+      <!-- SETTINGS -->
+      <section id="tab-settings" class="card" style="display:none">
+        <h3>Settings</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="min-width:260px">
+            <label style="display:block;color:var(--muted);font-size:13px">Camera Facing</label>
+            <select id="camera-facing" style="margin-top:8px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);">
+              <option value="user">Front (Selfie)</option>
+              <option value="environment">Back Camera</option>
+            </select>
+          </div>
 
-        <!-- FOOTER -->
-        <footer class="app-footer">
-            <p>⚡ AURA - Flex Your Fitness Journey | Made with AI Pose Tracking</p>
-            <p class="mt-1">Camera tracking requires permission. All processing happens locally in your browser.</p>
-        </footer>
+          <div style="min-width:260px">
+            <label style="display:block;color:var(--muted);font-size:13px">Enable Haptics</label>
+            <select id="enable-haptics" style="margin-top:8px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);">
+              <option value="true">On</option>
+              <option value="false">Off</option>
+            </select>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div>⚡ AURA — Made with MediaPipe • All processing local to your browser</div>
+      <div style="margin-top:6px;color:var(--muted)">Permissions: camera, geolocation (when using GPS mode).</div>
+    </footer>
+  </div>
+
+  <!-- ONBOARDING / MODAL -->
+  <div class="modal-backdrop" id="onboard-modal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Welcome to AURA</h3>
+        <button class="btn ghost" id="close-onboard">Close</button>
+      </div>
+      <div style="margin-top:10px;color:var(--muted)">
+        <ol>
+          <li>Choose a challenge (Pushups, Squats, Running)</li>
+          <li>Pick Camera or GPS mode (GPS for running)</li>
+          <li>Press Start Session and authorize camera/GPS</li>
+          <li>Get real-time rep counting, form tips, and Aura points</li>
+          <li>Generate stylish share cards — brag on social :)</li>
+        </ol>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // ===== CHALLENGE TYPES CONFIGURATION =====
-        const CHALLENGE_TYPES = {
-            // Cardio
-            RUNNING: { 
-                pointsPerKm: 10, 
-                tracking: 'GPS', 
-                emoji: '🏃‍♂️',
-                color: '#3b82f6',
-                description: 'Track your run with GPS',
-                instructions: 'Go for a run! We\'ll track distance using browser geolocation.'
-            },
-            CYCLING: { 
-                pointsPerKm: 8, 
-                tracking: 'GPS', 
-                emoji: '🚴‍♂️',
-                color: '#10b981',
-                description: 'Bike tracking with GPS',
-                instructions: 'Hop on your bike! We\'ll track your cycling distance.'
-            },
-            
-            // Bodyweight (Camera-Tracked)
-            PUSHUPS: { 
-                pointsPerRep: 1, 
-                tracking: 'Camera Pose', 
-                emoji: '💪',
-                color: '#ef4444',
-                description: 'AI counts your pushups',
-                instructions: '1. Start in plank position\n2. Lower chest to floor\n3. Push back up fully\n4. Keep body straight'
-            },
-            PULLUPS: { 
-                pointsPerRep: 5, 
-                tracking: 'Camera Pose', 
-                emoji: '🏋️',
-                color: '#8b5cf6',
-                description: 'Pullup counter with form check',
-                instructions: '1. Hang from bar\n2. Pull chin above bar\n3. Lower with control\n4. Avoid swinging'
-            },
-            SQUATS: { 
-                pointsPerRep: 2, 
-                tracking: 'Camera Pose', 
-                emoji: '🦵',
-                color: '#f59e0b',
-                description: 'Squat form analyzer',
-                instructions: '1. Feet shoulder-width\n2. Lower hips to knee level\n3. Keep chest up\n4. Drive through heels'
-            },
-            PLANK: { 
-                pointsPerSec: 0.2, 
-                tracking: 'Camera Hold', 
-                emoji: '🛡️',
-                color: '#06b6d4',
-                description: 'Plank stability tracker',
-                instructions: '1. Forearms on ground\n2. Body straight line\n3. Engage core\n4. Hold position'
-            },
-            BURPEES: { 
-                pointsPerRep: 3, 
-                tracking: 'Camera Full Body', 
-                emoji: '⚡',
-                color: '#ec4899',
-                description: 'Full-body movement tracking',
-                instructions: '1. Squat down\n2. Kick feet back\n3. Pushup position\n4. Jump up with clap'
-            },
-            
-            // Skill-Based
-            MEDITATION: { 
-                pointsPerMin: 3, 
-                tracking: 'Timer', 
-                emoji: '🧘',
-                color: '#84cc16',
-                description: 'Mindfulness timer',
-                instructions: 'Sit comfortably and focus on your breath. We\'ll time your session.'
-            },
-            YOGA: { 
-                pointsPerMin: 4, 
-                tracking: 'Camera Pose', 
-                emoji: '🙏',
-                color: '#f97316',
-                description: 'Yoga pose guidance',
-                instructions: 'Follow along with guided yoga poses. Camera helps with alignment.'
-            },
-            DANCE: { 
-                pointsPerMin: 6, 
-                tracking: 'Camera Movement', 
-                emoji: '💃',
-                color: '#8b5cf6',
-                description: 'Dance workout tracker',
-                instructions: 'Move to the rhythm! We\'ll track your energy and movement.'
-            }
-        };
+  <!-- SHARE CUSTOMIZE MODAL -->
+  <div class="modal-backdrop" id="share-customize-modal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Customize Share Card</h3>
+        <button class="btn ghost" id="close-share-customize">Close</button>
+      </div>
+      <div style="margin-top:10px">
+        <label style="display:block;color:var(--muted)">Quote</label>
+        <input id="share-quote" placeholder="Add a motivational quote..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);margin-top:8px;background:transparent;color:#fff" />
+        <label style="display:block;color:var(--muted);margin-top:10px">Hashtags</label>
+        <input id="share-hashtags" value="#AURA #Fitness" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);margin-top:8px;background:transparent;color:#fff" />
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button id="update-share-preview" class="btn primary">Update Preview</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        // ===== APP STATE =====
-        let appState = {
-            currentChallenge: null,
-            isTracking: false,
-            auraPoints: parseInt(localStorage.getItem('auraPoints')) || 0,
-            sessionStats: {
-                reps: 0,
-                auraEarned: 0,
-                startTime: null,
-                duration: 0
-            },
-            poseDetector: null,
-            cameraStream: null,
-            currentCamera: 'user',
-            workoutHistory: JSON.parse(localStorage.getItem('workoutHistory')) || [],
-            lastPushupState: 'up',
-            pushupCount: 0,
-            animationId: null
-        };
+  <script>
+    /************************************************************************
+     * AURA V2 - Single file upgraded app
+     * - Modular JS structure (all kept inline for single-file distribution)
+     * - Adds: tabs, onboarding, GPS basics, better session flow, share UI
+     ************************************************************************/
 
-        // ===== INITIALIZATION =====
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-            renderChallengeGrid();
-            setupEventListeners();
-            loadUserData();
-            updateAuraDisplay();
-            
-            // Auto-select first challenge
-            setTimeout(() => {
-                if (!appState.currentChallenge) {
-                    selectChallenge('PUSHUPS');
-                }
-            }, 500);
+    /* =========================
+       CONFIG / CHALLENGES
+       ========================= */
+    const CHALLENGE_TYPES = {
+      RUNNING: { pointsPerKm: 10, tracking: 'GPS', emoji: '🏃‍♂️', color: '#3b82f6', description: 'Track your run with GPS', instructions: 'Go for a run — GPS mode.'},
+      CYCLING: { pointsPerKm: 8, tracking: 'GPS', emoji: '🚴‍♂️', color: '#10b981', description: 'Bike tracking', instructions: 'Hop on your bike.'},
+      PUSHUPS: { pointsPerRep: 1, tracking: 'Camera', emoji: '💪', color: '#ef4444', description: 'AI counts pushups', instructions: 'Keep body straight, full range.'},
+      SQUATS: { pointsPerRep: 2, tracking: 'Camera', emoji: '🦵', color: '#f59e0b', description: 'Squat form analyzer', instructions: 'Knees track toes, hip below parallel.'},
+      PLANK: { pointsPerSec: 0.2, tracking: 'Timer', emoji: '🛡️', color: '#06b6d4', description: 'Plank stability', instructions: 'Hold for time, keep straight.'}
+    };
+
+    /* =========================
+       APP STATE
+       ========================= */
+    const appState = {
+      currentChallenge: 'PUSHUPS',
+      isTracking: false,
+      cameraFacing: 'user',
+      poseDetector: null,
+      cameraStream: null,
+      session: null,
+      workoutHistory: [],
+      workoutBest: 0,
+      gpsData: {watchId:null,coords:[],distanceMeters:0,lastTimestamp:0}
+    };
+
+    /* =========================
+       UTIL: Formatters & Math
+       ========================= */
+    function formatTime(seconds){
+      const m = Math.floor(seconds/60);
+      const s = seconds%60;
+      return `${m}:${s.toString().padStart(2,'0')}`;
+    }
+
+    function haversineDistance(lat1, lon1, lat2, lon2){
+      function toRad(x){return x*Math.PI/180;}
+      const R = 6371e3;
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δφ = toRad(lat2-lat1);
+      const Δλ = toRad(lon2-lon1);
+      const a = Math.sin(Δφ/2)*Math.sin(Δφ/2) + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)*Math.sin(Δλ/2);
+      const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+      return R*c; // meters
+    }
+
+    /* =========================
+       BOOTSTRAP: Load defaults
+       ========================= */
+    document.addEventListener('DOMContentLoaded', () => {
+      initUI();
+      renderChallengeGrid();
+      loadUserData();
+      initTabs();
+      setupEventListeners();
+      autoSelectFirst();
+      initChart();
+    });
+
+    /* =========================
+       UI / TABS
+       ========================= */
+    function initTabs(){
+      document.querySelectorAll('.tab').forEach(t => {
+        t.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+          t.classList.add('active');
+          const target = t.dataset.target;
+          document.querySelectorAll('main.container > section').forEach(s => s.style.display = 'none');
+          const el = document.getElementById(target);
+          if(el) el.style.display = 'block';
         });
+      });
+    }
 
-        function initializeApp() {
-            console.log('AURA App initialized');
-        }
+    function initUI(){
+      document.getElementById('total-aura').textContent = localStorage.getItem('auraPoints') || 0;
+      document.getElementById('total-aura-dup').textContent = localStorage.getItem('auraPoints') || 0;
+      document.getElementById('best-aura').textContent = (localStorage.getItem('bestAura') || 0) + ' Aura';
+    }
 
-        // ===== CHALLENGE GRID RENDERER =====
-        function renderChallengeGrid() {
-            const grid = document.getElementById('challenge-grid');
-            grid.innerHTML = '';
-            
-            Object.entries(CHALLENGE_TYPES).forEach(([key, challenge]) => {
-                const card = document.createElement('div');
-                card.className = 'challenge-card';
-                card.dataset.challenge = key;
-                card.style.borderLeft = `4px solid ${challenge.color}`;
-                
-                card.innerHTML = `
-                    <div class="challenge-icon">${challenge.emoji}</div>
-                    <h3 class="challenge-title">${key.charAt(0) + key.slice(1).toLowerCase()}</h3>
-                    <p class="challenge-description">${challenge.description}</p>
-                    <div class="challenge-stats">
-                        <div class="stat-item">
-                            <span class="stat-value">${challenge.tracking}</span>
-                            <span class="stat-label">Tracking</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">${challenge.pointsPerRep || challenge.pointsPerSec || challenge.pointsPerKm || challenge.pointsPerMin}</span>
-                            <span class="stat-label">Points</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">${challenge.tracking === 'Camera Pose' ? '📸' : '📍'}</span>
-                            <span class="stat-label">Method</span>
-                        </div>
-                    </div>
-                `;
-                
-                card.addEventListener('click', () => selectChallenge(key));
-                grid.appendChild(card);
-            });
-        }
+    /* =========================
+       CHALLENGE GRID
+       ========================= */
+    function renderChallengeGrid(){
+      const grid = document.getElementById('challenge-grid');
+      grid.innerHTML = '';
+      Object.entries(CHALLENGE_TYPES).forEach(([key, c]) => {
+        const card = document.createElement('div');
+        card.className = 'challenge-card' + (key===appState.currentChallenge ? ' active':'');
+        card.dataset.challenge = key;
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="challenge-emoji">${c.emoji}</div>
+              <div class="challenge-title">${key.charAt(0) + key.slice(1).toLowerCase()}</div>
+              <div class="challenge-desc">${c.description}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:900">${c.tracking}</div>
+              <div style="font-size:12px;color:var(--muted)">${c.pointsPerRep||c.pointsPerKm||c.pointsPerSec||c.pointsPerMin||''} pts</div>
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          selectChallenge(key);
+          document.querySelectorAll('.challenge-card').forEach(x=>x.classList.remove('active'));
+          card.classList.add('active');
+        });
+        grid.appendChild(card);
+      });
+    }
 
-        function selectChallenge(challengeKey) {
-            appState.currentChallenge = challengeKey;
-            
-            // Update UI
-            document.querySelectorAll('.challenge-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            const selectedCard = document.querySelector(`[data-challenge="${challengeKey}"]`);
-            if (selectedCard) {
-                selectedCard.classList.add('active');
-            }
-            
-            // Update instructions
-            const challenge = CHALLENGE_TYPES[challengeKey];
-            if (challenge) {
-                document.getElementById('instructions-text').textContent = challenge.instructions;
-            }
-            
-            // Update share preview
-            updateSharePreview();
-            
-            showStatusMessage(`Selected: ${challenge.emoji} ${challengeKey}`, 'success');
-        }
+    function selectChallenge(key){
+      appState.currentChallenge = key;
+      document.getElementById('selected-exercise').textContent = key;
+      updateSharePreview();
+      showToast(`Selected: ${key}`);
+    }
 
-        // ===== CAMERA TRACKING SYSTEM (FIXED) =====
-        async function startCamera() {
-            try {
-                // Stop existing stream if any
-                stopCamera();
-                
-                showStatusMessage('Starting camera...', 'info');
-                
-                // Get camera access
-                const constraints = {
-                    video: {
-                        facingMode: appState.currentCamera,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                };
-                
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                appState.cameraStream = stream;
-                
-                // Show in video element
-                const video = document.getElementById('camera-video');
-                video.srcObject = stream;
-                
-                // Wait for video to be ready
-                await new Promise((resolve) => {
-                    video.onloadedmetadata = () => {
-                        video.play().then(resolve);
-                    };
-                });
-                
-                // Initialize canvas for pose drawing
-                const canvas = document.getElementById('pose-canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                
-                showStatusMessage('✅ Camera working! You should see yourself.', 'success');
-                
-                // Initialize pose detection
-                await initializePoseDetection(video, canvas, ctx);
-                
-                // Start tracking session
-                startTrackingSession();
-                
-            } catch (error) {
-                console.error('Camera error:', error);
-                
-                let errorMessage = '❌ Camera failed: ';
-                
-                if (error.name === 'NotAllowedError') {
-                    errorMessage += 'Permission denied. Please allow camera access.';
-                } else if (error.name === 'NotFoundError') {
-                    errorMessage += 'No camera found. Check if camera is connected.';
-                } else if (error.name === 'NotReadableError') {
-                    errorMessage += 'Camera is being used by another app.';
-                } else if (error.name === 'OverconstrainedError') {
-                    errorMessage += 'Camera does not support requested settings.';
-                } else {
-                    errorMessage += error.message;
-                }
-                
-                showStatusMessage(errorMessage, 'error');
-                
-                // Try with simpler constraints
-                tryFallbackCamera();
-            }
-        }
-        
-        async function tryFallbackCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true, // Basic constraint
-                    audio: false
-                });
-                
-                appState.cameraStream = stream;
-                const video = document.getElementById('camera-video');
-                video.srcObject = stream;
-                await video.play();
-                
-                showStatusMessage('✅ Camera working with fallback mode!', 'success');
-                
-            } catch (fallbackError) {
-                showStatusMessage('❌ Even fallback camera failed. Please check browser permissions.', 'error');
-            }
-        }
-        
-        async function initializePoseDetection(video, canvas, ctx) {
-            if (!appState.poseDetector) {
-                appState.poseDetector = new Pose({
-                    locateFile: (file) => {
-                        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-                    }
-                });
-                
-                appState.poseDetector.setOptions({
-                    modelComplexity: 1,
-                    smoothLandmarks: true,
-                    minDetectionConfidence: 0.5,
-                    minTrackingConfidence: 0.5
-                });
-                
-                appState.poseDetector.onResults((results) => {
-                    // Clear canvas
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Draw video frame
-                    ctx.save();
-                    ctx.scale(-1, 1);
-                    ctx.translate(-canvas.width, 0);
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    ctx.restore();
-                    
-                    if (results.poseLandmarks) {
-                        drawPoseLandmarks(ctx, results.poseLandmarks, canvas);
-                        analyzePoseForExercise(results.poseLandmarks);
-                    }
-                    
-                    // Continue processing
-                    if (appState.isTracking) {
-                        appState.animationId = requestAnimationFrame(() => {
-                            appState.poseDetector.send({image: video});
-                        });
-                    }
-                });
-            }
-            
-            // Start processing
-            appState.poseDetector.send({image: video});
-        }
-        
-        function drawPoseLandmarks(ctx, landmarks, canvas) {
-            ctx.strokeStyle = '#00ff00';
-            ctx.lineWidth = 4;
-            ctx.fillStyle = '#ff0000';
-            
-            // Draw connections
-            const connections = [
-                [11, 12], [11, 13], [13, 15], [12, 14], [14, 16], // Arms
-                [11, 23], [12, 24], [23, 24], [23, 25], [24, 26], [25, 27], [26, 28] // Body and legs
-            ];
-            
-            connections.forEach(([start, end]) => {
-                const startPoint = landmarks[start];
-                const endPoint = landmarks[end];
-                
-                if (startPoint.visibility > 0.5 && endPoint.visibility > 0.5) {
-                    ctx.beginPath();
-                    ctx.moveTo(startPoint.x * canvas.width, startPoint.y * canvas.height);
-                    ctx.lineTo(endPoint.x * canvas.width, endPoint.y * canvas.height);
-                    ctx.stroke();
-                }
-            });
-            
-            // Draw landmarks
-            landmarks.forEach((landmark, i) => {
-                if (landmark.visibility > 0.5) {
-                    ctx.beginPath();
-                    ctx.arc(
-                        landmark.x * canvas.width,
-                        landmark.y * canvas.height,
-                        6, 0, 2 * Math.PI
-                    );
-                    ctx.fill();
-                }
-            });
-        }
-        
-        function analyzePoseForExercise(landmarks) {
-            if (!appState.currentChallenge || !appState.isTracking) return;
-            
-            switch(appState.currentChallenge) {
-                case 'PUSHUPS':
-                    detectPushups(landmarks);
-                    break;
-                case 'SQUATS':
-                    detectSquats(landmarks);
-                    break;
-                case 'PLANK':
-                    detectPlank(landmarks);
-                    break;
-                default:
-                    // For other exercises, use manual mode
-                    break;
-            }
-        }
-        
-        function detectPushups(landmarks) {
-            // Get key points
-            const leftShoulder = landmarks[11];
-            const leftElbow = landmarks[13];
-            const leftWrist = landmarks[15];
-            const rightShoulder = landmarks[12];
-            const rightElbow = landmarks[14];
-            const rightWrist = landmarks[16];
-            
-            if (!leftShoulder || !leftElbow || !leftWrist || 
-                !rightShoulder || !rightElbow || !rightWrist) return;
-            
-            // Calculate elbow angles
-            const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
-            const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
-            
-            // Pushup logic: angle < 90° = down, angle > 160° = up
-            if (leftAngle < 90 && rightAngle < 90 && appState.lastPushupState === 'up') {
-                appState.lastPushupState = 'down';
-            } else if (leftAngle > 160 && rightAngle > 160 && appState.lastPushupState === 'down') {
-                appState.lastPushupState = 'up';
-                appState.pushupCount++;
-                addRep();
-                
-                // Form feedback
-                const hipHeight = (landmarks[23].y + landmarks[24].y) / 2;
-                const shoulderHeight = (landmarks[11].y + landmarks[12].y) / 2;
-                
-                if (hipHeight > shoulderHeight + 0.1) {
-                    showFormFeedback('Keep your hips down!');
-                }
-            }
-        }
-        
-        function calculateAngle(a, b, c) {
-            const ab = {x: b.x - a.x, y: b.y - a.y};
-            const bc = {x: c.x - b.x, y: c.y - b.y};
-            
-            const dot = ab.x * bc.x + ab.y * bc.y;
-            const magAB = Math.sqrt(ab.x * ab.x + ab.y * ab.y);
-            const magBC = Math.sqrt(bc.x * bc.x + bc.y * bc.y);
-            
-            const angle = Math.acos(dot / (magAB * magBC));
-            return angle * (180 / Math.PI);
-        }
-        
-        function detectSquats(landmarks) {
-            // Similar logic for squats
-            // Check hip and knee angles
-        }
-        
-        function detectPlank(landmarks) {
-            // Check body alignment for plank
+    /* =========================
+       STORAGE
+       ========================= */
+    function loadUserData(){
+      const data = localStorage.getItem('workoutHistory');
+      if(data) appState.workoutHistory = JSON.parse(data);
+      document.getElementById('total-sessions').textContent = appState.workoutHistory.length;
+      document.getElementById('total-aura-dup').textContent = localStorage.getItem('auraPoints') || 0;
+      updateChartData();
+      renderAchievements();
+    }
+
+    function saveWorkoutSession(workout){
+      appState.workoutHistory.push(workout);
+      localStorage.setItem('workoutHistory', JSON.stringify(appState.workoutHistory));
+      document.getElementById('total-sessions').textContent = appState.workoutHistory.length;
+      updateChartData();
+    }
+
+    function clearData(){
+      if(confirm('Clear all local app data?')){
+        localStorage.clear();
+        appState.workoutHistory = [];
+        location.reload();
+      }
+    }
+
+    /* =========================
+       EVENT LISTENERS
+       ========================= */
+    function setupEventListeners(){
+      document.getElementById('open-onboard').addEventListener('click', openOnboard);
+      document.getElementById('close-onboard').addEventListener('click', closeOnboard);
+      document.getElementById('btn-start-session').addEventListener('click', startSessionFlow);
+      document.getElementById('btn-stop-session').addEventListener('click', stopSessionFlow);
+      document.getElementById('btn-switch-camera').addEventListener('click', switchCamera);
+      document.getElementById('btn-demo-mode').addEventListener('click', toggleDemoMode);
+      document.getElementById('btn-download-share').addEventListener('click', downloadShareCard);
+      document.getElementById('btn-generate-share-quick').addEventListener('click', generateShareCardImage);
+      document.getElementById('btn-download-share-quick').addEventListener('click', downloadShareCard);
+      document.getElementById('btn-clear-data').addEventListener('click', clearData);
+      document.getElementById('btn-customize-share').addEventListener('click', () => openModal('share-customize-modal'));
+      document.getElementById('close-share-customize').addEventListener('click', () => closeModal('share-customize-modal'));
+      document.getElementById('update-share-preview').addEventListener('click', updateSharePreviewFromModal);
+      document.getElementById('btn-share-social').addEventListener('click', shareToSocial);
+      document.getElementById('camera-facing').addEventListener('change', (e)=>{appState.cameraFacing=e.target.value});
+      document.getElementById('btn-switch-camera').addEventListener('click', switchCamera);
+      document.querySelectorAll('.modal-backdrop').forEach(m => {
+        m.addEventListener('click', (e)=>{ if(e.target===m) m.classList.remove('active')});
+      });
+      document.getElementById('tracking-mode').addEventListener('change', (e)=>{
+        // hint to user if selecting GPS
+        if(e.target.value === 'gps') showToast('GPS mode selected. Authorize location when the session starts.');
+      });
+      document.getElementById('btn-stop-session').addEventListener('click', stopSessionFlow);
+    }
+
+    /* =========================
+       MODALS / ONBOARD
+       ========================= */
+    function openOnboard(){ document.getElementById('onboard-modal').classList.add('active')}
+    function closeOnboard(){ document.getElementById('onboard-modal').classList.remove('active')}
+    function openModal(id){ document.getElementById(id).classList.add('active')}
+    function closeModal(id){ document.getElementById(id).classList.remove('active')}
+
+    /* =========================
+       TOAST
+       ========================= */
+    function showToast(msg, duration=2500){
+      const n = document.createElement('div');
+      n.textContent = msg;
+      n.style.cssText = 'position:fixed;top:90px;right:20px;background:var(--card);padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);z-index:9999;box-shadow:var(--shadow-lg)';
+      document.body.appendChild(n);
+      setTimeout(()=>{n.style.opacity=0;n.style.transform='translateY(-6px)';setTimeout(()=>n.remove(),300)},duration);
+    }
+
+    /* =========================
+       SESSION FLOW
+       ========================= */
+    function startSessionFlow(){
+      if(appState.isTracking){
+        showToast('Session already running.');
+        return;
+      }
+
+      appState.session = {
+        startTime: Date.now(),
+        reps: 0,
+        auraEarned: 0,
+        duration: 0,
+        type: appState.currentChallenge,
+        mode: document.getElementById('tracking-mode').value
+      };
+
+      // Start according to mode
+      const mode = appState.session.mode;
+      if(mode === 'camera'){
+        startCameraTracking();
+      } else if(mode === 'gps'){
+        startGPSTracking();
+      } else if(mode === 'timer'){
+        startTimerMode();
+      }
+
+      appState.isTracking = true;
+      document.getElementById('btn-start-session').style.display = 'none';
+      document.getElementById('btn-stop-session').style.display = 'inline-block';
+      showToast('Session started');
+      startSessionTimerLoop();
+    }
+
+    function stopSessionFlow(){
+      if(!appState.isTracking) return;
+      appState.isTracking = false;
+
+      // Stop camera
+      if(appState.cameraStream){
+        appState.cameraStream.getTracks().forEach(t => t.stop());
+        appState.cameraStream = null;
+      }
+      // Stop pose detector if exists
+      // Stop GPS watch
+      if(appState.gpsWatchId){
+        navigator.geolocation.clearWatch(appState.gpsWatchId);
+        appState.gpsWatchId = null;
+      }
+
+      // finalize session object
+      const session = appState.session;
+      session.endTime = Date.now();
+      session.duration = Math.round((session.endTime - session.startTime)/1000);
+      saveWorkoutSession({
+        challenge: session.type,
+        reps: session.reps,
+        aura: session.auraEarned,
+        duration: session.duration,
+        timestamp: new Date().toISOString()
+      });
+
+      // update best
+      const prevBest = parseInt(localStorage.getItem('bestAura') || '0', 10);
+      if(session.auraEarned > prevBest){
+        localStorage.setItem('bestAura', session.auraEarned);
+        showToast('🔥 New best Aura!');
+      }
+
+      // persist totals
+      const totalAura = parseInt(localStorage.getItem('auraPoints') || '0', 10) + session.auraEarned;
+      localStorage.setItem('auraPoints', totalAura);
+      document.getElementById('total-aura').textContent = totalAura;
+      document.getElementById('total-aura-dup').textContent = totalAura;
+
+      document.getElementById('btn-start-session').style.display = 'inline-block';
+      document.getElementById('btn-stop-session').style.display = 'none';
+
+      showToast('Session saved! Generate your share card.');
+      updateSharePreview();
+    }
+
+    /* =========================
+       TIMER (generic) MODE
+       ========================= */
+    let timerInterval = null;
+    function startTimerMode(){
+      // used for plank or meditation
+      const pointsPerSec = CHALLENGE_TYPES[appState.currentChallenge].pointsPerSec || 0.1;
+      if(timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(()=>{
+        if(!appState.isTracking){ clearInterval(timerInterval); return;}
+        appState.session.duration = Math.round((Date.now()-appState.session.startTime)/1000);
+        appState.session.auraEarned += pointsPerSec;
+        document.getElementById('aura-earned').textContent = Math.round(appState.session.auraEarned);
+        document.getElementById('session-timer').textContent = formatTime(appState.session.duration);
+      },1000);
+    }
+
+    /* =========================
+       CAMERA TRACKING (MediaPipe)
+       ========================= */
+    async function startCameraTracking(){
+      try {
+        const constraints = {video:{facingMode: appState.cameraFacing, width:{ideal:1280},height:{ideal:720}}};
+        appState.cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('camera-video');
+        video.srcObject = appState.cameraStream;
+        await video.play();
+
+        // Initialize MediaPipe Pose
+        if(!appState.poseDetector){
+          appState.poseDetector = new Pose({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+          });
+          appState.poseDetector.setOptions({
+            modelComplexity: 1,
+            smoothLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+          });
+          appState.poseDetector.onResults(onPoseResults);
         }
 
-        // ===== TRACKING SESSION MANAGEMENT =====
-        function startTrackingSession() {
-            if (!appState.currentChallenge) {
-                showStatusMessage('Please select a challenge first!', 'error');
-                return;
-            }
-            
-            appState.isTracking = true;
-            appState.sessionStats = {
-                reps: 0,
-                auraEarned: 0,
-                startTime: Date.now(),
-                duration: 0
-            };
-            
-            appState.pushupCount = 0;
-            appState.lastPushupState = 'up';
-            
-            // Update UI
-            document.getElementById('btn-start-tracker').classList.add('d-none');
-            document.getElementById('btn-stop-tracker').classList.remove('d-none');
-            
-            // Start timer
-            startSessionTimer();
-            
-            showStatusMessage('🎬 Tracking started! Perform your exercise.', 'success');
+        // Use camera frames
+        async function sendFrame(){
+          if(!appState.isTracking || !appState.cameraStream) return;
+          await appState.poseDetector.send({image: video});
+          requestAnimationFrame(sendFrame);
         }
+        sendFrame();
+      } catch(err){
+        console.error('Camera start error',err);
+        showToast('Camera permission denied or unavailable — demo mode enabled.');
+        startDemoMode();
+      }
+    }
 
-        function stopTrackingSession() {
-            appState.isTracking = false;
-            
-            // Stop animation frame
-            if (appState.animationId) {
-                cancelAnimationFrame(appState.animationId);
-                appState.animationId = null;
-            }
-            
-            // Update UI
-            document.getElementById('btn-start-tracker').classList.remove('d-none');
-            document.getElementById('btn-stop-tracker').classList.add('d-none');
-            
-            // Stop camera
-            if (appState.cameraStream) {
-                appState.cameraStream.getTracks().forEach(track => track.stop());
-                appState.cameraStream = null;
-            }
-            
-            // Save workout
-            saveWorkoutSession();
-            
-            showStatusMessage('✅ Session saved! Generate a share card.', 'success');
-        }
+    // Pose results renderer + analyzer
+    function onPoseResults(results){
+      const canvas = document.getElementById('pose-canvas');
+      const video = document.getElementById('camera-video');
+      if(!canvas || !video || !video.videoWidth) return;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
 
-        function startSessionTimer() {
-            let seconds = 0;
-            
-            const timerInterval = setInterval(() => {
-                if (!appState.isTracking) {
-                    clearInterval(timerInterval);
-                    return;
-                }
-                
-                seconds++;
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                
-                document.getElementById('timer').textContent = 
-                    `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-                
-                appState.sessionStats.duration = seconds;
-                
-                // For timed exercises like plank
-                if (appState.currentChallenge === 'PLANK') {
-                    addAuraPoints(CHALLENGE_TYPES.PLANK.pointsPerSec);
-                }
-            }, 1000);
-        }
+      // draw mirrored video
+      ctx.save();
+      ctx.scale(-1,1);
+      ctx.translate(-canvas.width,0);
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      ctx.restore();
 
-        function addRep() {
-            if (!appState.isTracking) return;
-            
-            appState.sessionStats.reps++;
-            
-            // Calculate aura points
-            const challenge = CHALLENGE_TYPES[appState.currentChallenge];
-            const points = challenge.pointsPerRep || 1;
-            
-            addAuraPoints(points);
-            
-            // Update display
-            document.getElementById('rep-count').textContent = appState.sessionStats.reps;
-            
-            // Haptic feedback
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-            
-            // Visual feedback
-            document.getElementById('rep-count').style.animation = 'pulse 0.3s';
-            setTimeout(() => {
-                document.getElementById('rep-count').style.animation = '';
-            }, 300);
-        }
+      // draw landmarks
+      if(results.poseLandmarks){
+        drawLandmarks(ctx, results.poseLandmarks);
+        analyzePose(results.poseLandmarks);
+      }
+    }
 
-        function addAuraPoints(points) {
-            appState.auraPoints += points;
-            appState.sessionStats.auraEarned += points;
-            
-            updateAuraDisplay();
-            document.getElementById('aura-earned').textContent = appState.sessionStats.auraEarned;
-            
-            // Check for achievements
-            checkAchievements();
+    function drawLandmarks(ctx, landmarks){
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(0,255,150,0.8)';
+      const connect = [[11,12],[11,13],[13,15],[12,14],[14,16],[23,24],[23,25],[24,26]];
+      connect.forEach(pair=>{
+        const a=landmarks[pair[0]], b=landmarks[pair[1]];
+        if(a && b && a.visibility>0.4 && b.visibility>0.4){
+          ctx.beginPath();
+          ctx.moveTo((1-a.x)*ctx.canvas.width,a.y*ctx.canvas.height);
+          ctx.lineTo((1-b.x)*ctx.canvas.width,b.y*ctx.canvas.height);
+          ctx.stroke();
         }
+      });
+      landmarks.forEach((lm,i)=>{
+        if(lm.visibility>0.4){
+          ctx.beginPath();
+          ctx.fillStyle = i<11? '#ff6b6b':'#3ee0c3';
+          ctx.arc((1-lm.x)*ctx.canvas.width, lm.y*ctx.canvas.height, 5,0,Math.PI*2);
+          ctx.fill();
+        }
+      });
+    }
 
-        function updateAuraDisplay() {
-            document.getElementById('total-aura').textContent = appState.auraPoints;
-            localStorage.setItem('auraPoints', appState.auraPoints);
-        }
+    /* ========== EXERCISE LOGIC - simple detectors ========== */
+    // Pushups: monitor elbow angle (shoulder-elbow-wrist). Count down-up cycles.
+    let pushupState = 'up';
+    function analyzePose(landmarks){
+      if(!appState.isTracking) return;
+      const current = appState.currentChallenge;
+      if(current === 'PUSHUPS') detectPushups(landmarks);
+      if(current === 'SQUATS') detectSquats(landmarks);
+      if(current === 'PLANK') detectPlank(landmarks);
+    }
 
-        // ===== FORM CORRECTION FEEDBACK =====
-        function showFormFeedback(message) {
-            const feedback = document.getElementById('form-feedback');
-            const text = document.getElementById('feedback-text');
-            
-            text.textContent = message;
-            feedback.classList.add('active');
-            
-            setTimeout(() => {
-                feedback.classList.remove('active');
-            }, 3000);
-        }
+    function vec(a,b){ return {x:b.x-a.x, y:b.y-a.y}; }
+    function angleBetween(a,b,c){
+      const ab = vec(a,b); const cb = vec(c,b);
+      const dot = ab.x*cb.x + ab.y*cb.y;
+      const magA = Math.sqrt(ab.x*ab.x + ab.y*ab.y);
+      const magC = Math.sqrt(cb.x*cb.x + cb.y*cb.y);
+      const cos = Math.max(-1, Math.min(1, dot/(magA*magC)));
+      return Math.acos(cos) * 180/Math.PI;
+    }
 
-        // ===== SHARE CARD GENERATION =====
-        function updateSharePreview() {
-            if (!appState.currentChallenge) return;
-            
-            const challenge = CHALLENGE_TYPES[appState.currentChallenge];
-            
-            document.getElementById('share-workout-name').textContent = 
-                appState.currentChallenge.charAt(0) + appState.currentChallenge.slice(1).toLowerCase();
-            
-            document.getElementById('share-reps').textContent = appState.sessionStats.reps;
-            document.getElementById('share-aura').textContent = appState.sessionStats.auraEarned;
-            document.getElementById('share-time').textContent = formatTime(appState.sessionStats.duration);
-            
-            // Update badge
-            const badge = document.getElementById('share-badge');
-            if (appState.sessionStats.reps > 0) {
-                if (appState.sessionStats.reps >= 100) {
-                    badge.textContent = '🏆 LEGENDARY WORKOUT';
-                    badge.style.display = 'inline-flex';
-                } else if (appState.sessionStats.reps >= 50) {
-                    badge.textContent = '🔥 PERSONAL BEST';
-                    badge.style.display = 'inline-flex';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        }
+    function detectPushups(landmarks){
+      const leftShoulder = landmarks[11], leftElbow = landmarks[13], leftWrist = landmarks[15];
+      const rightShoulder = landmarks[12], rightElbow = landmarks[14], rightWrist = landmarks[16];
+      if(!leftElbow || !rightElbow) return;
+      const leftAngle = angleBetween(leftShoulder,leftElbow,leftWrist);
+      const rightAngle = angleBetween(rightShoulder,rightElbow,rightWrist);
+      // down state if both < 100 deg, up if both > 150
+      if(leftAngle < 100 && rightAngle < 100 && pushupState === 'up'){
+        pushupState = 'down';
+      } else if(leftAngle > 150 && rightAngle > 150 && pushupState === 'down'){
+        pushupState = 'up';
+        pushupCount();
+      }
+      // form: hips too high?
+      const hipY = (landmarks[23].y + landmarks[24].y)/2;
+      const shoulderY = (landmarks[11].y + landmarks[12].y)/2;
+      if(hipY < shoulderY - 0.12){ // smaller y is higher on screen, so hip too high
+        showFormTip('Hips high — try lower body alignment');
+      }
+    }
 
-        async function generateShareCardImage() {
-            const preview = document.getElementById('share-card-preview');
-            
-            try {
-                const canvas = await html2canvas(preview, {
-                    backgroundColor: null,
-                    scale: 2,
-                    useCORS: true
-                });
-                
-                return canvas.toDataURL('image/png');
-            } catch (error) {
-                console.error('Share card generation failed:', error);
-                return null;
-            }
-        }
+    let pushCount = 0;
+    function pushupCount(){
+      appState.session.reps++;
+      pushCount++;
+      addAura(CHALLENGE_TYPES.PUSHUPS.pointsPerRep || 1);
+      document.getElementById('rep-count').textContent = appState.session.reps;
+      flashElement('rep-count');
+      // haptic
+      if(navigator.vibrate && document.getElementById('enable-haptics').value==='true') navigator.vibrate(40);
+    }
 
-        async function downloadShareCard() {
-            if (appState.sessionStats.reps === 0) {
-                showStatusMessage('Complete a workout first to generate share card!', 'error');
-                return;
-            }
-            
-            const imageUrl = await generateShareCardImage();
-            if (!imageUrl) {
-                showStatusMessage('❌ Failed to generate image', 'error');
-                return;
-            }
-            
-            const link = document.createElement('a');
-            link.download = `aura-workout-${Date.now()}.png`;
-            link.href = imageUrl;
-            link.click();
-            
-            showStatusMessage('📥 Image downloaded! Share it on social media.', 'success');
-        }
+    function detectSquats(landmarks){
+      // basic squat detection using hip-knee-ankle angle (hip-knee-ankle as knee angle)
+      const leftHip = landmarks[23], leftKnee = landmarks[25], leftAnkle = landmarks[27];
+      const rightHip = landmarks[24], rightKnee = landmarks[26], rightAnkle = landmarks[28];
+      if(!leftHip || !leftKnee || !leftAnkle) return;
+      const leftKneeAngle = angleBetween(leftHip,leftKnee,leftAnkle);
+      const rightKneeAngle = angleBetween(rightHip,rightKnee,rightAnkle);
+      const avg = (leftKneeAngle + rightKneeAngle)/2;
+      if(avg < 110 && squatState === 'up'){
+        squatState = 'down';
+      } else if(avg > 150 && squatState === 'down'){
+        squatState = 'up';
+        squatCount();
+      }
+    }
+    let squatState = 'up', squatTotal = 0;
+    function squatCount(){ appState.session.reps++; squatTotal++; addAura(CHALLENGE_TYPES.SQUATS.pointsPerRep || 2); document.getElementById('rep-count').textContent = appState.session.reps; flashElement('rep-count'); }
 
-        async function shareToSocial() {
-            if (appState.sessionStats.reps === 0) {
-                showStatusMessage('Complete a workout first to share!', 'error');
-                return;
-            }
-            
-            if (navigator.share) {
-                try {
-                    const imageUrl = await generateShareCardImage();
-                    const blob = await (await fetch(imageUrl)).blob();
-                    const file = new File([blob], 'aura-workout.png', { type: 'image/png' });
-                    
-                    await navigator.share({
-                        files: [file],
-                        title: `My ${appState.currentChallenge} Workout on AURA`,
-                        text: `I just earned ${appState.sessionStats.auraEarned} Aura Points! Can you beat my score? #AURA #Fitness`
-                    });
-                } catch (error) {
-                    console.log('Share cancelled:', error);
-                    // Fallback to download
-                    downloadShareCard();
-                }
-            } else {
-                // Fallback to download
-                downloadShareCard();
-                showStatusMessage('Image saved! Share it from your gallery 📱', 'success');
-            }
-        }
+    function detectPlank(landmarks){
+      // simple variance check: compare hip y vs shoulders; if roughly aligned, count as valid
+      const hipY = (landmarks[23].y + landmarks[24].y)/2;
+      const shoulderY = (landmarks[11].y + landmarks[12].y)/2;
+      const diff = Math.abs(hipY - shoulderY);
+      if(diff < 0.06){
+        // stable
+        appState.session.auraEarned += (CHALLENGE_TYPES.PLANK.pointsPerSec || 0.15);
+        document.getElementById('aura-earned').textContent = Math.round(appState.session.auraEarned);
+      } else {
+        showFormTip('Straighten your body for plank');
+      }
+    }
 
-        // ===== WORKOUT HISTORY =====
-        function saveWorkoutSession() {
-            const workout = {
-                challenge: appState.currentChallenge,
-                reps: appState.sessionStats.reps,
-                aura: appState.sessionStats.auraEarned,
-                duration: appState.sessionStats.duration,
-                timestamp: new Date().toISOString()
-            };
-            
-            appState.workoutHistory.push(workout);
-            
-            // Save to localStorage
-            localStorage.setItem('workoutHistory', JSON.stringify(appState.workoutHistory));
-            
-            // Update chart
-            updateProgressChart();
-        }
+    let lastFormTipTime = 0;
+    function showFormTip(msg){
+      const el = document.getElementById('form-feedback');
+      const text = document.getElementById('feedback-text');
+      text.textContent = msg;
+      el.style.display = 'block';
+      lastFormTipTime = Date.now();
+      setTimeout(()=>{ if(Date.now()-lastFormTipTime>=2000) el.style.display='none'},2500);
+    }
 
-        function loadUserData() {
-            // Already loaded from localStorage in appState initialization
-            updateProgressChart();
-        }
+    function flashElement(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.style.transition = 'transform 0.18s';
+      el.style.transform = 'scale(1.06)';
+      setTimeout(()=>el.style.transform='',180);
+    }
 
-        function updateProgressChart() {
-            const ctx = document.getElementById('progress-chart');
-            if (!ctx) return;
-            
-            const labels = appState.workoutHistory.slice(-7).map(w => 
-                new Date(w.timestamp).toLocaleDateString('en-US', { weekday: 'short' })
-            );
-            
-            const data = appState.workoutHistory.slice(-7).map(w => w.aura);
-            
-            if (window.progressChart) {
-                window.progressChart.destroy();
-            }
-            
-            // If no data, show empty chart
-            if (data.length === 0) {
-                data.push(0);
-                labels.push('Today');
-            }
-            
-            window.progressChart = new Chart(ctx.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Aura Points',
-                        data: data,
-                        borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255,255,255,0.1)' }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
-        }
+    /* =========================
+       DEMO MODE (fallback)
+       ========================= */
+    let demoInterval = null;
+    function startDemoMode(){
+      if(appState.isTracking) return;
+      appState.isTracking = true;
+      appState.session = {startTime:Date.now(),reps:0,auraEarned:0,duration:0, type:appState.currentChallenge};
+      demoInterval = setInterval(()=>{
+        appState.session.reps++;
+        addAura(1);
+        document.getElementById('rep-count').textContent = appState.session.reps;
+        document.getElementById('session-timer').textContent = formatTime(Math.round((Date.now()-appState.session.startTime)/1000));
+      },1400);
+      showToast('Demo mode running');
+    }
 
-        // ===== ACHIEVEMENT SYSTEM =====
-        function checkAchievements() {
-            const achievements = [
-                { threshold: 100, badge: '🏆 100 Aura Club', message: 'Welcome to the 100 Aura Club!' },
-                { threshold: 500, badge: '🔥 500 Aura Master', message: '500 Aura Points - You\'re on fire!' },
-                { threshold: 1000, badge: '⭐ 1000 Aura Legend', message: 'LEGEND STATUS! 1000 Aura Points!' }
-            ];
-            
-            achievements.forEach(achievement => {
-                if (appState.auraPoints >= achievement.threshold && 
-                    !localStorage.getItem(`achievement_${achievement.threshold}`)) {
-                    
-                    showStatusMessage(`🎉 ${achievement.message}`, 'success');
-                    localStorage.setItem(`achievement_${achievement.threshold}`, 'true');
-                }
-            });
-        }
+    function stopDemoMode(){
+      if(demoInterval) clearInterval(demoInterval);
+      appState.isTracking = false;
+    }
 
-        // ===== UTILITY FUNCTIONS =====
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
+    function toggleDemoMode(){
+      if(appState.isTracking) { stopDemoMode(); } else { startDemoMode(); }
+    }
 
-        function showStatusMessage(message, type = 'info') {
-            const statusDiv = document.getElementById('status-message');
-            statusDiv.textContent = message;
-            statusDiv.className = `status-message status-${type}`;
-            statusDiv.classList.remove('d-none');
-            
-            // Auto-hide after 5 seconds unless it's an error
-            if (type !== 'error') {
-                setTimeout(() => {
-                    statusDiv.classList.add('d-none');
-                }, 5000);
-            }
+    /* =========================
+       GPS RUNNING (basic)
+       ========================= */
+    function startGPSTracking(){
+      if(!navigator.geolocation){
+        showToast('Geolocation not supported in this browser');
+        return;
+      }
+      appState.gpsData = {coords:[],distanceMeters:0,lastTimestamp:0};
+      appState.gpsWatchId = navigator.geolocation.watchPosition(pos => {
+        const {latitude,longitude,accuracy,timestamp} = pos.coords ? {latitude:pos.coords.latitude,longitude:pos.coords.longitude,accuracy:pos.coords.accuracy} : pos;
+        const t = pos.timestamp || Date.now();
+        const coords = {lat:latitude,lng:longitude,timestamp:t};
+        if(appState.gpsData.coords.length>0){
+          const prev = appState.gpsData.coords[appState.gpsData.coords.length-1];
+          const d = haversineDistance(prev.lat,prev.lng,coords.lat,coords.lng);
+          appState.gpsData.distanceMeters += d;
+          const elapsed = (coords.timestamp - prev.timestamp)/1000;
+          const speed = d/elapsed*3.6 || 0;
+          document.getElementById('gps-speed').textContent = (speed||0).toFixed(1) + ' km/h';
         }
+        appState.gpsData.coords.push(coords);
+        document.getElementById('gps-distance').textContent = (appState.gpsData.distanceMeters/1000).toFixed(2) + ' km';
+        // give points when accumulating distance
+        const km = appState.gpsData.distanceMeters/1000;
+        const points = Math.floor(km * (CHALLENGE_TYPES.RUNNING.pointsPerKm || 10));
+        appState.session.auraEarned = points;
+        document.getElementById('aura-earned').textContent = appState.session.auraEarned;
+      }, err => {
+        console.error('GPS err',err);
+        showToast('GPS permission denied or unavailable');
+      }, {enableHighAccuracy:true,maximumAge:1000,timeout:5000});
+    }
 
-        function switchCamera() {
-            appState.currentCamera = appState.currentCamera === 'user' ? 'environment' : 'user';
-            
-            if (appState.cameraStream) {
-                appState.cameraStream.getTracks().forEach(track => track.stop());
-            }
-            
-            if (appState.isTracking) {
-                startCamera();
-            }
-            
-            showStatusMessage(`Switched to ${appState.currentCamera === 'user' ? 'front' : 'back'} camera`, 'info');
-        }
+    /* =========================
+       SESSION TIMER LOOP
+       ========================= */
+    let sessionTick = null;
+    function startSessionTimerLoop(){
+      if(sessionTick) clearInterval(sessionTick);
+      sessionTick = setInterval(()=>{
+        if(!appState.isTracking || !appState.session) { clearInterval(sessionTick); return; }
+        const elapsed = Math.round((Date.now() - appState.session.startTime)/1000);
+        appState.session.duration = elapsed;
+        document.getElementById('session-timer').textContent = formatTime(elapsed);
+        // update share preview & aura displays
+        document.getElementById('aura-earned').textContent = Math.round(appState.session.auraEarned);
+      }, 1000);
+    }
 
-        function stopCamera() {
-            if (appState.cameraStream) {
-                appState.cameraStream.getTracks().forEach(track => track.stop());
-                appState.cameraStream = null;
-            }
-            
-            // Stop animation frame
-            if (appState.animationId) {
-                cancelAnimationFrame(appState.animationId);
-                appState.animationId = null;
-            }
-        }
+    /* =========================
+       SHARE CARD
+       ========================= */
+    function updateSharePreview(){
+      const s = appState.session || {reps:0,auraEarned:0,duration:0};
+      document.getElementById('share-workout-name').textContent = appState.currentChallenge;
+      document.getElementById('share-reps').textContent = s.reps || 0;
+      document.getElementById('share-aura').textContent = Math.round(s.auraEarned || 0);
+      document.getElementById('share-time').textContent = formatTime(s.duration || 0);
+      if(s.reps >= 50){
+        const b = document.getElementById('share-badge'); b.style.display='inline-block'; b.textContent='🔥 PERSONAL BEST';
+      } else { document.getElementById('share-badge').style.display='none' }
+    }
 
-        // ===== EVENT LISTENERS SETUP =====
-        function setupEventListeners() {
-            // Start/Stop tracking
-            document.getElementById('btn-start-tracker').addEventListener('click', startCamera);
-            document.getElementById('btn-stop-tracker').addEventListener('click', stopTrackingSession);
-            
-            // Camera switch
-            document.getElementById('btn-switch-camera').addEventListener('click', switchCamera);
-            
-            // Share card actions
-            document.getElementById('btn-download-share').addEventListener('click', downloadShareCard);
-            document.getElementById('btn-share-social').addEventListener('click', shareToSocial);
-            document.getElementById('btn-customize-share').addEventListener('click', () => {
-                showStatusMessage('Customization coming soon!', 'info');
-            });
-            
-            // Demo button
-            document.getElementById('btn-start-demo').addEventListener('click', () => {
-                if (!appState.currentChallenge) {
-                    selectChallenge('PUSHUPS');
-                }
-                startCamera();
-            });
-            
-            // Generate share button
-            document.getElementById('btn-generate-share').addEventListener('click', () => {
-                if (appState.sessionStats.reps === 0) {
-                    showStatusMessage('Complete a workout first to generate share card!', 'error');
-                    return;
-                }
-                updateSharePreview();
-                showStatusMessage('Share card updated!', 'success');
-            });
+    function updateSharePreviewFromModal(){
+      const quote = document.getElementById('share-quote').value || '';
+      const hashtags = document.getElementById('share-hashtags').value || '';
+      // we keep it simple: append to title
+      const el = document.getElementById('share-workout-name');
+      el.textContent = (appState.currentChallenge + (quote ? ' — ' + quote : ''));
+      closeModal('share-customize-modal');
+      showToast('Share preview updated');
+    }
+
+    async function generateShareCardImage(){
+      updateSharePreview();
+      const preview = document.getElementById('share-card-preview');
+      try {
+        const canvas = await html2canvas(preview, {backgroundColor: null, scale:2, useCORS:true});
+        return canvas.toDataURL('image/png');
+      } catch(err){
+        console.error('html2canvas err',err);
+        return null;
+      }
+    }
+
+    async function downloadShareCard(){
+      const dataUrl = await generateShareCardImage();
+      if(!dataUrl){ showToast('Failed to generate image'); return; }
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `aura-${appState.currentChallenge.toLowerCase()}-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('Image downloaded');
+    }
+
+    async function shareToSocial(){
+      if(navigator.share){
+        const dataUrl = await generateShareCardImage();
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob],'aura.png',{type:'image/png'});
+        try {
+          await navigator.share({files:[file],title:'My AURA Workout',text:`I just earned ${Math.round(appState.session?.auraEarned||0)} Aura!`});
+        } catch(err){ console.log('share canceled',err); }
+      } else {
+        downloadShareCard();
+      }
+    }
+
+    /* =========================
+       ACHIEVEMENTS
+       ========================= */
+    function checkAchievements(){
+      const total = parseInt(localStorage.getItem('auraPoints') || '0',10);
+      const container = document.getElementById('achievements-list');
+      const badges = [
+        {threshold:100,label:'🏆 100 Aura'},
+        {threshold:500,label:'🔥 500 Aura'},
+        {threshold:1000,label:'⭐ 1000 Aura'}
+      ];
+      container.innerHTML = '';
+      badges.forEach(b=>{
+        const has = total >= b.threshold;
+        const el = document.createElement('div');
+        el.style.padding='8px';
+        el.style.borderRadius='8px';
+        el.style.background = has ? 'linear-gradient(90deg,#0f1724,#0b1220)' : 'transparent';
+        el.style.border = '1px solid rgba(255,255,255,0.03)';
+        el.textContent = b.label;
+        container.appendChild(el);
+        if(has && !localStorage.getItem('ach_'+b.threshold)){
+          localStorage.setItem('ach_'+b.threshold,'1');
+          showToast(`Unlocked: ${b.label}`);
         }
-    </script>
+      });
+    }
+
+    function renderAchievements(){ checkAchievements(); }
+
+    /* =========================
+       CHART
+       ========================= */
+    let progressChart = null;
+    function initChart(){
+      const ctx = document.getElementById('progress-chart').getContext('2d');
+      progressChart = new Chart(ctx, {
+        type:'line',
+        data: { labels:[], datasets:[{label:'Aura',data:[],tension:0.3,fill:true}] },
+        options:{
+          plugins:{legend:{display:false}},
+          scales:{y:{beginAtZero:true, grid:{color:'rgba(255,255,255,0.04)'}}}
+        }
+      });
+      updateChartData();
+    }
+
+    function updateChartData(){
+      const last7 = appState.workoutHistory.slice(-7);
+      const labels = last7.map(w => new Date(w.timestamp).toLocaleDateString());
+      const data = last7.map(w => w.aura);
+      if(progressChart){
+        progressChart.data.labels = labels;
+        progressChart.data.datasets[0].data = data;
+        progressChart.update();
+      }
+      document.getElementById('streak-days').textContent = calcStreak();
+      document.getElementById('total-aura-dup').textContent = localStorage.getItem('auraPoints') || 0;
+    }
+
+    function calcStreak(){
+      // simple consecutive-day streak
+      const days = new Set(appState.workoutHistory.map(w => new Date(w.timestamp).toDateString()));
+      return days.size;
+    }
+
+    /* =========================
+       HELPERS / SMALL UX
+       ========================= */
+    function autoSelectFirst(){
+      if(!appState.currentChallenge) selectChallenge('PUSHUPS');
+      else selectChallenge(appState.currentChallenge);
+    }
+
+    function addAura(points){
+      appState.session.auraEarned += points;
+      document.getElementById('aura-earned').textContent = Math.round(appState.session.auraEarned);
+      document.getElementById('total-aura').textContent = parseInt(localStorage.getItem('auraPoints')||'0',10) + Math.round(appState.session.auraEarned);
+      checkAchievements();
+    }
+
+    function pushupCount(){ /* placeholder if needed */ }
+
+    /* expose variables to console for debugging */
+    window.AURA = { appState, CHALLENGE_TYPES };
+
+    // Small safety: stop everything when page hidden
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden && appState.isTracking){
+        // gracefully stop (you could instead pause)
+        // stopSessionFlow(); // optional auto-stop
+      }
+    });
+
+    /* =========================
+       END OF FILE
+       ========================= */
+  </script>
 </body>
 </html>
