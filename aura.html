@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA - Flex Your Fitness</title>
+    <!-- MediaPipe Pose Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- HTML2Canvas for share cards -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        /* ===== MODERN CSS VARIABLES ===== */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-bg: #0f172a;
+            --darker-bg: #0b1220;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --border-color: #334155;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --accent-yellow: #fbbf24;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.2);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== LAYOUT ===== */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            background: var(--card-bg);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .aura-points {
+            background: var(--primary-gradient);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .aura-points span {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .aura-points small {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            text-align: center;
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* ===== CHALLENGE GRID ===== */
+        .challenge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .challenge-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-purple);
+        }
+
+        .challenge-card.active {
+            border: 2px solid var(--accent-green);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+        }
+
+        .challenge-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .challenge-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .challenge-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .challenge-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== CAMERA TRACKER ===== */
+        .camera-section {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: #000;
+            aspect-ratio: 16/9;
+        }
+
+        #camera-video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror effect for selfie view */
+        }
+
+        #pose-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .tracker-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .tracker-stats {
+            display: flex;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .tracker-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .tracker-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 180px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Status message */
+        .status-message {
+            margin: 1rem auto;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* ===== PROGRESS SECTION ===== */
+        .progress-section {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .progress-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent-purple);
+        }
+
+        /* ===== SHARE CARDS ===== */
+        .share-section {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .share-card-preview {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .share-card-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .share-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: white;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .share-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 2rem 0;
+        }
+
+        .share-stat {
+            text-align: center;
+        }
+
+        .share-stat-value {
+            font-size: 3rem;
+            font-weight: 900;
+            display: block;
+            background: white;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .share-stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* ===== MODALS ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== LOADING STATES ===== */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ===== FORM CORRECTION FEEDBACK ===== */
+        .form-feedback {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+            display: none;
+            z-index: 10;
+        }
+
+        .form-feedback.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .feedback-title {
+            color: var(--accent-yellow);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .challenge-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tracker-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .share-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .text-center { text-align: center; }
+        .mb-1 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 2rem; }
+        .d-none { display: none; }
+        .d-flex { display: flex; }
+        .flex-column { flex-direction: column; }
+        .align-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .gap-1 { gap: 1rem; }
+        .w-100 { width: 100%; }
+
+        /* ===== FOOTER ===== */
+        .app-footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">⚡</div>
+                    <div class="logo-text">AURA</div>
+                </div>
+                <div class="aura-points">
+                    <span id="total-aura">0</span>
+                    <small>Aura Points</small>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- HERO SECTION -->
+            <section class="hero-section">
+                <h1 class="hero-title">Flex Your Fitness Journey</h1>
+                <p class="hero-subtitle">
+                    Track workouts with AI camera, earn Aura Points, create stunning share cards.
+                    Go viral with your progress!
+                </p>
+                <div class="controls">
+                    <button id="btn-start-demo" class="btn btn-primary">
+                        🎬 Start Camera Demo
+                    </button>
+                    <button id="btn-generate-share" class="btn btn-success">
+                        🎨 Generate Share Card
+                    </button>
+                </div>
+            </section>
+
+            <!-- STATUS MESSAGES -->
+            <div id="status-message" class="status-message d-none"></div>
+
+            <!-- CHALLENGE SELECTION -->
+            <section class="mb-2">
+                <h2 class="mb-1 text-center">🎯 Choose Your Challenge</h2>
+                <div class="challenge-grid" id="challenge-grid">
+                    <!-- Challenges will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- CAMERA TRACKER -->
+            <section class="camera-section">
+                <h2 class="mb-1 text-center">📸 Live Camera Tracking</h2>
+                <p class="text-center mb-2">Position yourself 2-3 meters from camera for best results</p>
+                
+                <div class="camera-container">
+                    <video id="camera-video" autoplay playsinline></video>
+                    <canvas id="pose-canvas"></canvas>
+                    
+                    <div class="tracker-overlay">
+                        <div class="tracker-stats">
+                            <div>
+                                <div class="tracker-value" id="rep-count">0</div>
+                                <div class="tracker-label">REPS</div>
+                            </div>
+                            <div>
+                                <div class="tracker-value" id="aura-earned">0</div>
+                                <div class="tracker-label">AURA</div>
+                            </div>
+                            <div>
+                                <div class="tracker-value" id="timer">0:00</div>
+                                <div class="tracker-label">TIME</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Correction Feedback -->
+                    <div class="form-feedback" id="form-feedback">
+                        <div class="feedback-title">⚠️ Form Tip</div>
+                        <div id="feedback-text">Keep your back straight!</div>
+                    </div>
+                </div>
+
+                <div class="controls mt-2">
+                    <button id="btn-start-tracker" class="btn btn-primary">
+                        ▶️ Start Tracking
+                    </button>
+                    <button id="btn-stop-tracker" class="btn btn-danger d-none">
+                        ⏹️ Stop Tracking
+                    </button>
+                    <button id="btn-switch-camera" class="btn">
+                        🔄 Switch Camera
+                    </button>
+                </div>
+
+                <!-- Exercise Instructions -->
+                <div class="mt-2" id="exercise-instructions">
+                    <h4>📋 How to perform:</h4>
+                    <p id="instructions-text">Select a challenge to see instructions</p>
+                </div>
+            </section>
+
+            <!-- PROGRESS & ANALYTICS -->
+            <section class="progress-section">
+                <h2 class="mb-1 text-center">📊 Your Progress</h2>
+                <canvas id="progress-chart"></canvas>
+                
+                <div class="progress-grid mt-2">
+                    <div class="progress-card">
+                        <h4>🔥 Current Streak</h4>
+                        <div class="tracker-value">0 days</div>
+                    </div>
+                    <div class="progress-card">
+                        <h4>🏆 Best Session</h4>
+                        <div class="tracker-value">0 Aura</div>
+                    </div>
+                    <div class="progress-card">
+                        <h4>🎯 Challenges Done</h4>
+                        <div class="tracker-value">0</div>
+                    </div>
+                    <div class="progress-card">
+                        <h4>⭐ Level</h4>
+                        <div class="tracker-value">1</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SHARE CARD GENERATOR -->
+            <section class="share-section">
+                <h2 class="mb-1 text-center">🎨 Create Viral Share Card</h2>
+                <p class="text-center mb-2">Generate stunning images to flex on social media</p>
+                
+                <div class="share-card-preview" id="share-card-preview">
+                    <div class="share-card-content">
+                        <div class="share-title" id="share-workout-name">PUSHUPS</div>
+                        <div class="share-stats">
+                            <div class="share-stat">
+                                <span class="share-stat-value" id="share-reps">50</span>
+                                <span class="share-stat-label">REPS</span>
+                            </div>
+                            <div class="share-stat">
+                                <span class="share-stat-value" id="share-aura">50</span>
+                                <span class="share-stat-label">AURA</span>
+                            </div>
+                            <div class="share-stat">
+                                <span class="share-stat-value" id="share-time">2:30</span>
+                                <span class="share-stat-label">TIME</span>
+                            </div>
+                        </div>
+                        <div class="badge" id="share-badge">🏆 NEW PERSONAL BEST</div>
+                    </div>
+                </div>
+
+                <div class="controls mt-2">
+                    <button id="btn-customize-share" class="btn">
+                        🎨 Customize Design
+                    </button>
+                    <button id="btn-download-share" class="btn btn-success">
+                        📥 Download Image
+                    </button>
+                    <button id="btn-share-social" class="btn btn-primary">
+                        📤 Share to Social
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <p>⚡ AURA - Flex Your Fitness Journey | Made with AI Pose Tracking</p>
+            <p class="mt-1">Camera tracking requires permission. All processing happens locally in your browser.</p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== CHALLENGE TYPES CONFIGURATION =====
+        const CHALLENGE_TYPES = {
+            // Cardio
+            RUNNING: { 
+                pointsPerKm: 10, 
+                tracking: 'GPS', 
+                emoji: '🏃‍♂️',
+                color: '#3b82f6',
+                description: 'Track your run with GPS',
+                instructions: 'Go for a run! We\'ll track distance using browser geolocation.'
+            },
+            CYCLING: { 
+                pointsPerKm: 8, 
+                tracking: 'GPS', 
+                emoji: '🚴‍♂️',
+                color: '#10b981',
+                description: 'Bike tracking with GPS',
+                instructions: 'Hop on your bike! We\'ll track your cycling distance.'
+            },
+            
+            // Bodyweight (Camera-Tracked)
+            PUSHUPS: { 
+                pointsPerRep: 1, 
+                tracking: 'Camera Pose', 
+                emoji: '💪',
+                color: '#ef4444',
+                description: 'AI counts your pushups',
+                instructions: '1. Start in plank position\n2. Lower chest to floor\n3. Push back up fully\n4. Keep body straight'
+            },
+            PULLUPS: { 
+                pointsPerRep: 5, 
+                tracking: 'Camera Pose', 
+                emoji: '🏋️',
+                color: '#8b5cf6',
+                description: 'Pullup counter with form check',
+                instructions: '1. Hang from bar\n2. Pull chin above bar\n3. Lower with control\n4. Avoid swinging'
+            },
+            SQUATS: { 
+                pointsPerRep: 2, 
+                tracking: 'Camera Pose', 
+                emoji: '🦵',
+                color: '#f59e0b',
+                description: 'Squat form analyzer',
+                instructions: '1. Feet shoulder-width\n2. Lower hips to knee level\n3. Keep chest up\n4. Drive through heels'
+            },
+            PLANK: { 
+                pointsPerSec: 0.2, 
+                tracking: 'Camera Hold', 
+                emoji: '🛡️',
+                color: '#06b6d4',
+                description: 'Plank stability tracker',
+                instructions: '1. Forearms on ground\n2. Body straight line\n3. Engage core\n4. Hold position'
+            },
+            BURPEES: { 
+                pointsPerRep: 3, 
+                tracking: 'Camera Full Body', 
+                emoji: '⚡',
+                color: '#ec4899',
+                description: 'Full-body movement tracking',
+                instructions: '1. Squat down\n2. Kick feet back\n3. Pushup position\n4. Jump up with clap'
+            },
+            
+            // Skill-Based
+            MEDITATION: { 
+                pointsPerMin: 3, 
+                tracking: 'Timer', 
+                emoji: '🧘',
+                color: '#84cc16',
+                description: 'Mindfulness timer',
+                instructions: 'Sit comfortably and focus on your breath. We\'ll time your session.'
+            },
+            YOGA: { 
+                pointsPerMin: 4, 
+                tracking: 'Camera Pose', 
+                emoji: '🙏',
+                color: '#f97316',
+                description: 'Yoga pose guidance',
+                instructions: 'Follow along with guided yoga poses. Camera helps with alignment.'
+            },
+            DANCE: { 
+                pointsPerMin: 6, 
+                tracking: 'Camera Movement', 
+                emoji: '💃',
+                color: '#8b5cf6',
+                description: 'Dance workout tracker',
+                instructions: 'Move to the rhythm! We\'ll track your energy and movement.'
+            }
+        };
+
+        // ===== APP STATE =====
+        let appState = {
+            currentChallenge: null,
+            isTracking: false,
+            auraPoints: parseInt(localStorage.getItem('auraPoints')) || 0,
+            sessionStats: {
+                reps: 0,
+                auraEarned: 0,
+                startTime: null,
+                duration: 0
+            },
+            poseDetector: null,
+            cameraStream: null,
+            currentCamera: 'user',
+            workoutHistory: JSON.parse(localStorage.getItem('workoutHistory')) || [],
+            lastPushupState: 'up',
+            pushupCount: 0,
+            animationId: null
+        };
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            renderChallengeGrid();
+            setupEventListeners();
+            loadUserData();
+            updateAuraDisplay();
+            
+            // Auto-select first challenge
+            setTimeout(() => {
+                if (!appState.currentChallenge) {
+                    selectChallenge('PUSHUPS');
+                }
+            }, 500);
+        });
+
+        function initializeApp() {
+            console.log('AURA App initialized');
+        }
+
+        // ===== CHALLENGE GRID RENDERER =====
+        function renderChallengeGrid() {
+            const grid = document.getElementById('challenge-grid');
+            grid.innerHTML = '';
+            
+            Object.entries(CHALLENGE_TYPES).forEach(([key, challenge]) => {
+                const card = document.createElement('div');
+                card.className = 'challenge-card';
+                card.dataset.challenge = key;
+                card.style.borderLeft = `4px solid ${challenge.color}`;
+                
+                card.innerHTML = `
+                    <div class="challenge-icon">${challenge.emoji}</div>
+                    <h3 class="challenge-title">${key.charAt(0) + key.slice(1).toLowerCase()}</h3>
+                    <p class="challenge-description">${challenge.description}</p>
+                    <div class="challenge-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">${challenge.tracking}</span>
+                            <span class="stat-label">Tracking</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${challenge.pointsPerRep || challenge.pointsPerSec || challenge.pointsPerKm || challenge.pointsPerMin}</span>
+                            <span class="stat-label">Points</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${challenge.tracking === 'Camera Pose' ? '📸' : '📍'}</span>
+                            <span class="stat-label">Method</span>
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => selectChallenge(key));
+                grid.appendChild(card);
+            });
+        }
+
+        function selectChallenge(challengeKey) {
+            appState.currentChallenge = challengeKey;
+            
+            // Update UI
+            document.querySelectorAll('.challenge-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            const selectedCard = document.querySelector(`[data-challenge="${challengeKey}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('active');
+            }
+            
+            // Update instructions
+            const challenge = CHALLENGE_TYPES[challengeKey];
+            if (challenge) {
+                document.getElementById('instructions-text').textContent = challenge.instructions;
+            }
+            
+            // Update share preview
+            updateSharePreview();
+            
+            showStatusMessage(`Selected: ${challenge.emoji} ${challengeKey}`, 'success');
+        }
+
+        // ===== CAMERA TRACKING SYSTEM (FIXED) =====
+        async function startCamera() {
+            try {
+                // Stop existing stream if any
+                stopCamera();
+                
+                showStatusMessage('Starting camera...', 'info');
+                
+                // Get camera access
+                const constraints = {
+                    video: {
+                        facingMode: appState.currentCamera,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                appState.cameraStream = stream;
+                
+                // Show in video element
+                const video = document.getElementById('camera-video');
+                video.srcObject = stream;
+                
+                // Wait for video to be ready
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        video.play().then(resolve);
+                    };
+                });
+                
+                // Initialize canvas for pose drawing
+                const canvas = document.getElementById('pose-canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                showStatusMessage('✅ Camera working! You should see yourself.', 'success');
+                
+                // Initialize pose detection
+                await initializePoseDetection(video, canvas, ctx);
+                
+                // Start tracking session
+                startTrackingSession();
+                
+            } catch (error) {
+                console.error('Camera error:', error);
+                
+                let errorMessage = '❌ Camera failed: ';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'Permission denied. Please allow camera access.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'No camera found. Check if camera is connected.';
+                } else if (error.name === 'NotReadableError') {
+                    errorMessage += 'Camera is being used by another app.';
+                } else if (error.name === 'OverconstrainedError') {
+                    errorMessage += 'Camera does not support requested settings.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showStatusMessage(errorMessage, 'error');
+                
+                // Try with simpler constraints
+                tryFallbackCamera();
+            }
+        }
+        
+        async function tryFallbackCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true, // Basic constraint
+                    audio: false
+                });
+                
+                appState.cameraStream = stream;
+                const video = document.getElementById('camera-video');
+                video.srcObject = stream;
+                await video.play();
+                
+                showStatusMessage('✅ Camera working with fallback mode!', 'success');
+                
+            } catch (fallbackError) {
+                showStatusMessage('❌ Even fallback camera failed. Please check browser permissions.', 'error');
+            }
+        }
+        
+        async function initializePoseDetection(video, canvas, ctx) {
+            if (!appState.poseDetector) {
+                appState.poseDetector = new Pose({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+                    }
+                });
+                
+                appState.poseDetector.setOptions({
+                    modelComplexity: 1,
+                    smoothLandmarks: true,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+                
+                appState.poseDetector.onResults((results) => {
+                    // Clear canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw video frame
+                    ctx.save();
+                    ctx.scale(-1, 1);
+                    ctx.translate(-canvas.width, 0);
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    ctx.restore();
+                    
+                    if (results.poseLandmarks) {
+                        drawPoseLandmarks(ctx, results.poseLandmarks, canvas);
+                        analyzePoseForExercise(results.poseLandmarks);
+                    }
+                    
+                    // Continue processing
+                    if (appState.isTracking) {
+                        appState.animationId = requestAnimationFrame(() => {
+                            appState.poseDetector.send({image: video});
+                        });
+                    }
+                });
+            }
+            
+            // Start processing
+            appState.poseDetector.send({image: video});
+        }
+        
+        function drawPoseLandmarks(ctx, landmarks, canvas) {
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 4;
+            ctx.fillStyle = '#ff0000';
+            
+            // Draw connections
+            const connections = [
+                [11, 12], [11, 13], [13, 15], [12, 14], [14, 16], // Arms
+                [11, 23], [12, 24], [23, 24], [23, 25], [24, 26], [25, 27], [26, 28] // Body and legs
+            ];
+            
+            connections.forEach(([start, end]) => {
+                const startPoint = landmarks[start];
+                const endPoint = landmarks[end];
+                
+                if (startPoint.visibility > 0.5 && endPoint.visibility > 0.5) {
+                    ctx.beginPath();
+                    ctx.moveTo(startPoint.x * canvas.width, startPoint.y * canvas.height);
+                    ctx.lineTo(endPoint.x * canvas.width, endPoint.y * canvas.height);
+                    ctx.stroke();
+                }
+            });
+            
+            // Draw landmarks
+            landmarks.forEach((landmark, i) => {
+                if (landmark.visibility > 0.5) {
+                    ctx.beginPath();
+                    ctx.arc(
+                        landmark.x * canvas.width,
+                        landmark.y * canvas.height,
+                        6, 0, 2 * Math.PI
+                    );
+                    ctx.fill();
+                }
+            });
+        }
+        
+        function analyzePoseForExercise(landmarks) {
+            if (!appState.currentChallenge || !appState.isTracking) return;
+            
+            switch(appState.currentChallenge) {
+                case 'PUSHUPS':
+                    detectPushups(landmarks);
+                    break;
+                case 'SQUATS':
+                    detectSquats(landmarks);
+                    break;
+                case 'PLANK':
+                    detectPlank(landmarks);
+                    break;
+                default:
+                    // For other exercises, use manual mode
+                    break;
+            }
+        }
+        
+        function detectPushups(landmarks) {
+            // Get key points
+            const leftShoulder = landmarks[11];
+            const leftElbow = landmarks[13];
+            const leftWrist = landmarks[15];
+            const rightShoulder = landmarks[12];
+            const rightElbow = landmarks[14];
+            const rightWrist = landmarks[16];
+            
+            if (!leftShoulder || !leftElbow || !leftWrist || 
+                !rightShoulder || !rightElbow || !rightWrist) return;
+            
+            // Calculate elbow angles
+            const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+            const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+            
+            // Pushup logic: angle < 90° = down, angle > 160° = up
+            if (leftAngle < 90 && rightAngle < 90 && appState.lastPushupState === 'up') {
+                appState.lastPushupState = 'down';
+            } else if (leftAngle > 160 && rightAngle > 160 && appState.lastPushupState === 'down') {
+                appState.lastPushupState = 'up';
+                appState.pushupCount++;
+                addRep();
+                
+                // Form feedback
+                const hipHeight = (landmarks[23].y + landmarks[24].y) / 2;
+                const shoulderHeight = (landmarks[11].y + landmarks[12].y) / 2;
+                
+                if (hipHeight > shoulderHeight + 0.1) {
+                    showFormFeedback('Keep your hips down!');
+                }
+            }
+        }
+        
+        function calculateAngle(a, b, c) {
+            const ab = {x: b.x - a.x, y: b.y - a.y};
+            const bc = {x: c.x - b.x, y: c.y - b.y};
+            
+            const dot = ab.x * bc.x + ab.y * bc.y;
+            const magAB = Math.sqrt(ab.x * ab.x + ab.y * ab.y);
+            const magBC = Math.sqrt(bc.x * bc.x + bc.y * bc.y);
+            
+            const angle = Math.acos(dot / (magAB * magBC));
+            return angle * (180 / Math.PI);
+        }
+        
+        function detectSquats(landmarks) {
+            // Similar logic for squats
+            // Check hip and knee angles
+        }
+        
+        function detectPlank(landmarks) {
+            // Check body alignment for plank
+        }
+
+        // ===== TRACKING SESSION MANAGEMENT =====
+        function startTrackingSession() {
+            if (!appState.currentChallenge) {
+                showStatusMessage('Please select a challenge first!', 'error');
+                return;
+            }
+            
+            appState.isTracking = true;
+            appState.sessionStats = {
+                reps: 0,
+                auraEarned: 0,
+                startTime: Date.now(),
+                duration: 0
+            };
+            
+            appState.pushupCount = 0;
+            appState.lastPushupState = 'up';
+            
+            // Update UI
+            document.getElementById('btn-start-tracker').classList.add('d-none');
+            document.getElementById('btn-stop-tracker').classList.remove('d-none');
+            
+            // Start timer
+            startSessionTimer();
+            
+            showStatusMessage('🎬 Tracking started! Perform your exercise.', 'success');
+        }
+
+        function stopTrackingSession() {
+            appState.isTracking = false;
+            
+            // Stop animation frame
+            if (appState.animationId) {
+                cancelAnimationFrame(appState.animationId);
+                appState.animationId = null;
+            }
+            
+            // Update UI
+            document.getElementById('btn-start-tracker').classList.remove('d-none');
+            document.getElementById('btn-stop-tracker').classList.add('d-none');
+            
+            // Stop camera
+            if (appState.cameraStream) {
+                appState.cameraStream.getTracks().forEach(track => track.stop());
+                appState.cameraStream = null;
+            }
+            
+            // Save workout
+            saveWorkoutSession();
+            
+            showStatusMessage('✅ Session saved! Generate a share card.', 'success');
+        }
+
+        function startSessionTimer() {
+            let seconds = 0;
+            
+            const timerInterval = setInterval(() => {
+                if (!appState.isTracking) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+                
+                seconds++;
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                
+                document.getElementById('timer').textContent = 
+                    `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+                
+                appState.sessionStats.duration = seconds;
+                
+                // For timed exercises like plank
+                if (appState.currentChallenge === 'PLANK') {
+                    addAuraPoints(CHALLENGE_TYPES.PLANK.pointsPerSec);
+                }
+            }, 1000);
+        }
+
+        function addRep() {
+            if (!appState.isTracking) return;
+            
+            appState.sessionStats.reps++;
+            
+            // Calculate aura points
+            const challenge = CHALLENGE_TYPES[appState.currentChallenge];
+            const points = challenge.pointsPerRep || 1;
+            
+            addAuraPoints(points);
+            
+            // Update display
+            document.getElementById('rep-count').textContent = appState.sessionStats.reps;
+            
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            
+            // Visual feedback
+            document.getElementById('rep-count').style.animation = 'pulse 0.3s';
+            setTimeout(() => {
+                document.getElementById('rep-count').style.animation = '';
+            }, 300);
+        }
+
+        function addAuraPoints(points) {
+            appState.auraPoints += points;
+            appState.sessionStats.auraEarned += points;
+            
+            updateAuraDisplay();
+            document.getElementById('aura-earned').textContent = appState.sessionStats.auraEarned;
+            
+            // Check for achievements
+            checkAchievements();
+        }
+
+        function updateAuraDisplay() {
+            document.getElementById('total-aura').textContent = appState.auraPoints;
+            localStorage.setItem('auraPoints', appState.auraPoints);
+        }
+
+        // ===== FORM CORRECTION FEEDBACK =====
+        function showFormFeedback(message) {
+            const feedback = document.getElementById('form-feedback');
+            const text = document.getElementById('feedback-text');
+            
+            text.textContent = message;
+            feedback.classList.add('active');
+            
+            setTimeout(() => {
+                feedback.classList.remove('active');
+            }, 3000);
+        }
+
+        // ===== SHARE CARD GENERATION =====
+        function updateSharePreview() {
+            if (!appState.currentChallenge) return;
+            
+            const challenge = CHALLENGE_TYPES[appState.currentChallenge];
+            
+            document.getElementById('share-workout-name').textContent = 
+                appState.currentChallenge.charAt(0) + appState.currentChallenge.slice(1).toLowerCase();
+            
+            document.getElementById('share-reps').textContent = appState.sessionStats.reps;
+            document.getElementById('share-aura').textContent = appState.sessionStats.auraEarned;
+            document.getElementById('share-time').textContent = formatTime(appState.sessionStats.duration);
+            
+            // Update badge
+            const badge = document.getElementById('share-badge');
+            if (appState.sessionStats.reps > 0) {
+                if (appState.sessionStats.reps >= 100) {
+                    badge.textContent = '🏆 LEGENDARY WORKOUT';
+                    badge.style.display = 'inline-flex';
+                } else if (appState.sessionStats.reps >= 50) {
+                    badge.textContent = '🔥 PERSONAL BEST';
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        async function generateShareCardImage() {
+            const preview = document.getElementById('share-card-preview');
+            
+            try {
+                const canvas = await html2canvas(preview, {
+                    backgroundColor: null,
+                    scale: 2,
+                    useCORS: true
+                });
+                
+                return canvas.toDataURL('image/png');
+            } catch (error) {
+                console.error('Share card generation failed:', error);
+                return null;
+            }
+        }
+
+        async function downloadShareCard() {
+            if (appState.sessionStats.reps === 0) {
+                showStatusMessage('Complete a workout first to generate share card!', 'error');
+                return;
+            }
+            
+            const imageUrl = await generateShareCardImage();
+            if (!imageUrl) {
+                showStatusMessage('❌ Failed to generate image', 'error');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = `aura-workout-${Date.now()}.png`;
+            link.href = imageUrl;
+            link.click();
+            
+            showStatusMessage('📥 Image downloaded! Share it on social media.', 'success');
+        }
+
+        async function shareToSocial() {
+            if (appState.sessionStats.reps === 0) {
+                showStatusMessage('Complete a workout first to share!', 'error');
+                return;
+            }
+            
+            if (navigator.share) {
+                try {
+                    const imageUrl = await generateShareCardImage();
+                    const blob = await (await fetch(imageUrl)).blob();
+                    const file = new File([blob], 'aura-workout.png', { type: 'image/png' });
+                    
+                    await navigator.share({
+                        files: [file],
+                        title: `My ${appState.currentChallenge} Workout on AURA`,
+                        text: `I just earned ${appState.sessionStats.auraEarned} Aura Points! Can you beat my score? #AURA #Fitness`
+                    });
+                } catch (error) {
+                    console.log('Share cancelled:', error);
+                    // Fallback to download
+                    downloadShareCard();
+                }
+            } else {
+                // Fallback to download
+                downloadShareCard();
+                showStatusMessage('Image saved! Share it from your gallery 📱', 'success');
+            }
+        }
+
+        // ===== WORKOUT HISTORY =====
+        function saveWorkoutSession() {
+            const workout = {
+                challenge: appState.currentChallenge,
+                reps: appState.sessionStats.reps,
+                aura: appState.sessionStats.auraEarned,
+                duration: appState.sessionStats.duration,
+                timestamp: new Date().toISOString()
+            };
+            
+            appState.workoutHistory.push(workout);
+            
+            // Save to localStorage
+            localStorage.setItem('workoutHistory', JSON.stringify(appState.workoutHistory));
+            
+            // Update chart
+            updateProgressChart();
+        }
+
+        function loadUserData() {
+            // Already loaded from localStorage in appState initialization
+            updateProgressChart();
+        }
+
+        function updateProgressChart() {
+            const ctx = document.getElementById('progress-chart');
+            if (!ctx) return;
+            
+            const labels = appState.workoutHistory.slice(-7).map(w => 
+                new Date(w.timestamp).toLocaleDateString('en-US', { weekday: 'short' })
+            );
+            
+            const data = appState.workoutHistory.slice(-7).map(w => w.aura);
+            
+            if (window.progressChart) {
+                window.progressChart.destroy();
+            }
+            
+            // If no data, show empty chart
+            if (data.length === 0) {
+                data.push(0);
+                labels.push('Today');
+            }
+            
+            window.progressChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Aura Points',
+                        data: data,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== ACHIEVEMENT SYSTEM =====
+        function checkAchievements() {
+            const achievements = [
+                { threshold: 100, badge: '🏆 100 Aura Club', message: 'Welcome to the 100 Aura Club!' },
+                { threshold: 500, badge: '🔥 500 Aura Master', message: '500 Aura Points - You\'re on fire!' },
+                { threshold: 1000, badge: '⭐ 1000 Aura Legend', message: 'LEGEND STATUS! 1000 Aura Points!' }
+            ];
+            
+            achievements.forEach(achievement => {
+                if (appState.auraPoints >= achievement.threshold && 
+                    !localStorage.getItem(`achievement_${achievement.threshold}`)) {
+                    
+                    showStatusMessage(`🎉 ${achievement.message}`, 'success');
+                    localStorage.setItem(`achievement_${achievement.threshold}`, 'true');
+                }
+            });
+        }
+
+        // ===== UTILITY FUNCTIONS =====
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function showStatusMessage(message, type = 'info') {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.classList.remove('d-none');
+            
+            // Auto-hide after 5 seconds unless it's an error
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.classList.add('d-none');
+                }, 5000);
+            }
+        }
+
+        function switchCamera() {
+            appState.currentCamera = appState.currentCamera === 'user' ? 'environment' : 'user';
+            
+            if (appState.cameraStream) {
+                appState.cameraStream.getTracks().forEach(track => track.stop());
+            }
+            
+            if (appState.isTracking) {
+                startCamera();
+            }
+            
+            showStatusMessage(`Switched to ${appState.currentCamera === 'user' ? 'front' : 'back'} camera`, 'info');
+        }
+
+        function stopCamera() {
+            if (appState.cameraStream) {
+                appState.cameraStream.getTracks().forEach(track => track.stop());
+                appState.cameraStream = null;
+            }
+            
+            // Stop animation frame
+            if (appState.animationId) {
+                cancelAnimationFrame(appState.animationId);
+                appState.animationId = null;
+            }
+        }
+
+        // ===== EVENT LISTENERS SETUP =====
+        function setupEventListeners() {
+            // Start/Stop tracking
+            document.getElementById('btn-start-tracker').addEventListener('click', startCamera);
+            document.getElementById('btn-stop-tracker').addEventListener('click', stopTrackingSession);
+            
+            // Camera switch
+            document.getElementById('btn-switch-camera').addEventListener('click', switchCamera);
+            
+            // Share card actions
+            document.getElementById('btn-download-share').addEventListener('click', downloadShareCard);
+            document.getElementById('btn-share-social').addEventListener('click', shareToSocial);
+            document.getElementById('btn-customize-share').addEventListener('click', () => {
+                showStatusMessage('Customization coming soon!', 'info');
+            });
+            
+            // Demo button
+            document.getElementById('btn-start-demo').addEventListener('click', () => {
+                if (!appState.currentChallenge) {
+                    selectChallenge('PUSHUPS');
+                }
+                startCamera();
+            });
+            
+            // Generate share button
+            document.getElementById('btn-generate-share').addEventListener('click', () => {
+                if (appState.sessionStats.reps === 0) {
+                    showStatusMessage('Complete a workout first to generate share card!', 'error');
+                    return;
+                }
+                updateSharePreview();
+                showStatusMessage('Share card updated!', 'success');
+            });
+        }
+    </script>
+</body>
+</html>
